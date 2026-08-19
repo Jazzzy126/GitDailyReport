@@ -1,0 +1,535 @@
+[v-cloak] {
+  display: none !important;
+}
+
+/* 
+ *  Apple macOS Sonoma / iOS 18 HIG Studio Pro Complete Redesign System
+ * Pure Apple HIG Specification: Authentic Popover Context Menus, Micro-Sized Disclosure Chevrons, Inset Spaced Options
+ */
+
+:root {
+  /* Apple HIG Corner Radius Hierarchy */
+  --radius-outer: 20px;   /* Main Studio Card Container */
+  --radius-middle: 12px;  /* Inputs / Dropzone / Cards */
+  --radius-inner: 8px;    /* Buttons / Select Options */
+  --radius-pill: 9999px;  /* Capsule Badges */
+
+  /* Apple Light Mode Palette */
+  --bg-studio-light: #f1f5f9;
+  --glass-pane-light: rgba(255, 255, 255, 0.72);
+  --glass-header-light: rgba(255, 255, 255, 0.45);
+  --border-glass-light: rgba(255, 255, 255, 0.85);
+  --border-subtle-light: rgba(15, 23, 42, 0.08);
+
+  /* Apple Ambient Shadows */
+  --shadow-card-light: 0 20px 40px -15px rgba(15, 23, 42, 0.07), 0 0 0 1px rgba(15, 23, 42, 0.04);
+  --shadow-modal-light: 0 24px 48px -12px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(15, 23, 42, 0.06);
+  --shadow-popover-light: 0 12px 32px -4px rgba(15, 23, 42, 0.12), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  --shadow-blue-btn: 0 4px 14px 0 rgba(0, 122, 255, 0.35);
+}
+
+.dark {
+  /* Apple Dark Mode Palette */
+  --bg-studio-dark: #060911;
+  --glass-pane-dark: rgba(15, 23, 42, 0.65);
+  --glass-header-dark: rgba(15, 23, 42, 0.35);
+  --border-glass-dark: rgba(255, 255, 255, 0.12);
+  --border-subtle-dark: rgba(255, 255, 255, 0.08);
+
+  /* Apple Dark Ambient Shadows */
+  --shadow-card-dark: 0 24px 48px -16px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-modal-dark: 0 40px 80px -20px rgba(0, 0, 0, 0.88), 0 0 0 1px rgba(255, 255, 255, 0.12);
+  --shadow-popover-dark: 0 20px 40px -8px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --shadow-blue-btn: 0 4px 18px 0 rgba(0, 122, 255, 0.5);
+
+  color-scheme: dark;
+}
+
+.dark input[type="date"] {
+  color-scheme: dark;
+}
+
+/* Global Reset & Ambient Mesh Canvas */
+html, body {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+body {
+  background: radial-gradient(circle at 50% 0%, rgba(0, 122, 255, 0.08), transparent 70%),
+              radial-gradient(circle at 10% 30%, rgba(94, 92, 230, 0.04), transparent 60%),
+              linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+  background-attachment: fixed;
+  color: #0f172a;
+  font-size: 14px;
+  line-height: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", sans-serif;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dark body {
+  background: radial-gradient(circle at 50% 0%, rgba(0, 122, 255, 0.18), transparent 75%),
+              radial-gradient(circle at 80% 20%, rgba(94, 92, 230, 0.1), transparent 65%),
+              linear-gradient(135deg, #050810 0%, #0c1220 50%, #060b18 100%);
+  background-attachment: fixed;
+  color: #f8fafc;
+}
+
+/* Desktop Studio Locked Mode */
+@media (min-width: 1024px) {
+  html, body {
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+/*  iOS Glass Navigation Bar */
+.ios-header {
+  background-color: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--border-subtle-light);
+}
+.dark .ios-header {
+  background-color: rgba(12, 18, 32, 0.65);
+  border-bottom-color: var(--border-subtle-dark);
+}
+
+/*  Studio Card Panes: Frosted Liquid Glass */
+.studio-pane {
+  border-radius: var(--radius-outer);
+  background-color: var(--glass-pane-light);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border-glass-light);
+  box-shadow: var(--shadow-card-light);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dark .studio-pane {
+  background-color: var(--glass-pane-dark);
+  border-color: var(--border-glass-dark);
+  box-shadow: var(--shadow-card-dark);
+}
+
+/*  Edge-to-Edge 44px Card Header Bar Component */
+.studio-card-header {
+  height: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  border-bottom: 1px solid var(--border-subtle-light);
+  background-color: var(--glass-header-light);
+  flex-shrink: 0;
+}
+.dark .studio-card-header {
+  border-bottom-color: var(--border-subtle-dark);
+  background-color: var(--glass-header-dark);
+}
+
+/*  Unified Header Title Component */
+.studio-pane-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.015em;
+  color: #0f172a;
+}
+.dark .studio-pane-title {
+  color: #f8fafc;
+}
+
+.studio-pane-title-icon {
+  width: 1.125rem; /* 18px */
+  height: 1.125rem;
+  color: #007AFF;
+  flex-shrink: 0;
+}
+
+/*  iOS Capsule Badge Pill */
+.studio-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.2rem 0.625rem;
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  background-color: rgba(0, 122, 255, 0.12);
+  color: #007AFF;
+  border: 1px solid rgba(0, 122, 255, 0.15);
+  transition: all 0.15s ease;
+}
+.dark .studio-badge-pill {
+  background-color: rgba(0, 122, 255, 0.18);
+  color: #38bdf8;
+  border-color: rgba(0, 122, 255, 0.25);
+}
+
+/*  Drop Zone Styling */
+.drop-zone-box {
+  border-radius: var(--radius-middle);
+  background-color: rgba(0, 122, 255, 0.03);
+  border: 2px dashed rgba(0, 122, 255, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.drop-zone-box:hover {
+  background-color: rgba(0, 122, 255, 0.08);
+  border-color: #007AFF;
+  transform: translateY(-1px);
+}
+.dark .drop-zone-box {
+  background-color: rgba(0, 122, 255, 0.05);
+  border-color: rgba(0, 122, 255, 0.3);
+}
+.dark .drop-zone-box:hover {
+  background-color: rgba(0, 122, 255, 0.12);
+  border-color: #38bdf8;
+}
+
+/*  Input Controls & Textareas */
+.ios-input-box {
+  border-radius: var(--radius-middle);
+  background-color: rgba(241, 245, 249, 0.7);
+  border: 1px solid rgba(203, 213, 225, 0.6);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dark .ios-input-box {
+  background-color: rgba(30, 41, 59, 0.5);
+  border-color: rgba(51, 65, 85, 0.6);
+}
+.ios-input-box:focus, .ios-input-box:focus-within {
+  border-color: #007AFF;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+.dark .ios-input-box:focus, .dark .ios-input-box:focus-within {
+  background-color: rgba(15, 23, 42, 0.8);
+}
+
+.studio-editor-textarea {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Mono", "PingFang SC", monospace;
+  font-size: 13px;
+  line-height: 22px;
+  letter-spacing: -0.01em;
+}
+
+/*  Commit Item List Cell */
+.commit-item {
+  border-radius: var(--radius-middle);
+  border: 1px solid transparent;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.commit-item:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+  border-color: rgba(203, 213, 225, 0.8);
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.05);
+  transform: translateY(-1px);
+}
+.dark .commit-item:hover {
+  background-color: rgba(30, 41, 59, 0.7);
+  border-color: rgba(51, 65, 85, 0.7);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4);
+}
+
+/*  Standardized Form Control Typography & Alignment (Date Input & Select Trigger) */
+.ios-form-control {
+  width: 100%;
+  height: 38px;
+  min-height: 38px;
+  padding: 0 12px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 36px !important;
+  letter-spacing: -0.01em;
+  border-radius: var(--radius-middle);
+  background-color: rgba(241, 245, 249, 0.7);
+  border: 1px solid rgba(203, 213, 225, 0.6);
+  color: #0f172a;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+.dark .ios-form-control {
+  background-color: rgba(30, 41, 59, 0.5);
+  border-color: rgba(51, 65, 85, 0.6);
+  color: #f8fafc;
+}
+.ios-form-control:focus, .ios-form-control:focus-within {
+  border-color: #007AFF;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+.dark .ios-form-control:focus, .dark .ios-form-control:focus-within {
+  background-color: rgba(15, 23, 42, 0.8);
+}
+
+/*  WebKit Native Date Picker Shadow DOM Alignment (Forces Exact 12px SF Pro Font) */
+input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 20px !important;
+  letter-spacing: -0.01em !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  width: 14px;
+  height: 14px;
+  opacity: 0.6;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+/*  Standardized Studio Button System (Height 38px, Uniform Radii & Micro-interactions) */
+.studio-btn {
+  height: 38px;
+  min-height: 38px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem; /* 6px */
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  border-radius: var(--radius-middle);
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.studio-btn:active {
+  transform: scale(0.96);
+}
+
+.studio-btn-primary {
+  background-color: #007AFF;
+  color: #ffffff;
+  border: 1px solid rgba(0, 122, 255, 0.2);
+  box-shadow: 0 2px 8px 0 rgba(0, 122, 255, 0.3);
+}
+.studio-btn-primary:hover {
+  background-color: #0062cc;
+  box-shadow: 0 4px 14px 0 rgba(0, 122, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.studio-btn-secondary {
+  background-color: rgba(241, 245, 249, 0.8);
+  color: #0f172a;
+  border: 1px solid rgba(203, 213, 225, 0.8);
+}
+.dark .studio-btn-secondary {
+  background-color: rgba(30, 41, 59, 0.6);
+  color: #f8fafc;
+  border-color: rgba(51, 65, 85, 0.6);
+}
+.studio-btn-secondary:hover {
+  background-color: rgba(226, 232, 240, 0.9);
+  transform: translateY(-1px);
+}
+.dark .studio-btn-secondary:hover {
+  background-color: rgba(51, 65, 85, 0.8);
+}
+
+/*  Authentic iOS Segmented Control Active State */
+.settings-tab-btn {
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.settings-tab-btn.active-settings-tab {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+.dark .settings-tab-btn.active-settings-tab {
+  background-color: #334155 !important;
+  color: #f8fafc !important;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.4) !important;
+}
+
+/*  Interactive Spring Pressure Scale */
+.ios-press-action {
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ios-press-action:active {
+  transform: scale(0.985);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+/*  Authentic Apple iOS Popover Context Menu & Custom Select System */
+.custom-select-container {
+  position: relative;
+}
+
+.custom-select-trigger {
+  width: 100%;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 12px;
+  padding-right: 10px;
+  cursor: pointer;
+  background-color: rgba(241, 245, 249, 0.7);
+  border: 1px solid rgba(203, 213, 225, 0.6);
+  border-radius: var(--radius-middle);
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+.dark .custom-select-trigger {
+  background-color: rgba(30, 41, 59, 0.5);
+  border-color: rgba(51, 65, 85, 0.6);
+}
+.custom-select-trigger:hover {
+  border-color: rgba(0, 122, 255, 0.5);
+}
+.custom-select-container.open .custom-select-trigger {
+  border-color: #007AFF;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+.dark .custom-select-container.open .custom-select-trigger {
+  background-color: rgba(15, 23, 42, 0.8);
+}
+
+/* Chevron Icon Fixed iOS Micro Scale (14px) */
+.custom-select-chevron {
+  width: 14px !important;
+  height: 14px !important;
+  opacity: 0.6;
+  flex-shrink: 0;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.custom-select-container.open .custom-select-chevron {
+  transform: rotate(180deg);
+  opacity: 0.9;
+  color: #007AFF;
+}
+
+/* iOS HIG Popover Menu Glass Container with Strict Inset Padding */
+.custom-select-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 70;
+  display: none;
+  border-radius: var(--radius-middle);
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-popover-light);
+  overflow: hidden;
+  padding: 6px; /* iOS Spaced Inset Padding */
+  space-y: 4px;
+}
+.dark .custom-select-dropdown {
+  background-color: rgba(15, 23, 42, 0.92);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: var(--shadow-popover-dark);
+}
+.custom-select-container.open .custom-select-dropdown {
+  display: block;
+  animation: iosPopoverIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes iosPopoverIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* iOS HIG Inset Spaced Option Items with Margin Gaps */
+.custom-select-option {
+  padding: 7px 10px;
+  margin-bottom: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px; /* Inset rounded option box */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.12s ease;
+}
+.custom-select-option:last-child {
+  margin-bottom: 0;
+}
+.custom-select-option:hover {
+  background-color: rgba(0, 122, 255, 0.1);
+  color: #007AFF;
+}
+.dark .custom-select-option:hover {
+  background-color: rgba(0, 122, 255, 0.18);
+  color: #38bdf8;
+}
+.custom-select-option.selected {
+  background-color: rgba(0, 122, 255, 0.15);
+  color: #007AFF;
+  font-weight: 700;
+}
+.dark .custom-select-option.selected {
+  background-color: rgba(0, 122, 255, 0.22);
+  color: #38bdf8;
+}
+.custom-select-option .check-icon {
+  width: 14px !important;
+  height: 14px !important;
+  display: none;
+  color: #007AFF;
+}
+.dark .custom-select-option .check-icon {
+  color: #38bdf8;
+}
+.custom-select-option.selected .check-icon {
+  display: inline-block;
+}
+
+/* Toast Message Overlay */
+.toast-msg {
+  background-color: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(16px);
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
