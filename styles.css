@@ -3,53 +3,153 @@
 }
 
 /* 
- *  Apple macOS Sonoma / iOS 18 HIG Studio Pro Complete Redesign System
- * Pure Apple HIG Specification: Authentic Popover Context Menus, Micro-Sized Disclosure Chevrons, Inset Spaced Options
+ *  Apple HIG Studio Pro 3-Tier Design System Architecture
+ * DTCG 2025.10 Standard Token Implementation
  */
 
+/* ==========================================
+   Tier 1: Core Design Tokens (Atomic Values)
+   ========================================== */
 :root {
-  /* Apple HIG Corner Radius Hierarchy */
-  --radius-outer: 20px;   /* Main Studio Card Container */
-  --radius-middle: 12px;  /* Inputs / Dropzone / Cards */
-  --radius-inner: 8px;    /* Buttons / Select Options */
-  --radius-pill: 9999px;  /* Capsule Badges */
+  /* Brand Identity Color Palette */
+  --color-brand-500: #0066FF;
+  --color-brand-400: #0A84FF;
+  --color-brand-600: #0052CC;
+  --color-brand-glow: rgba(0, 102, 255, 0.25);
+  --color-brand-subtle: rgba(0, 102, 255, 0.08);
 
-  /* Apple Light Mode Palette */
-  --bg-studio-light: #f1f5f9;
-  --glass-pane-light: rgba(255, 255, 255, 0.72);
-  --glass-header-light: rgba(255, 255, 255, 0.45);
-  --border-glass-light: rgba(255, 255, 255, 0.85);
-  --border-subtle-light: rgba(15, 23, 42, 0.08);
+  /* Status Semantic Palette */
+  --color-success: #10b981;
+  --color-success-subtle: rgba(16, 185, 129, 0.12);
+  --color-danger: #f43f5e;
+  --color-danger-subtle: rgba(244, 63, 94, 0.12);
+  --color-warning: #f59e0b;
+  --color-warning-subtle: rgba(245, 158, 11, 0.12);
 
-  /* Apple Ambient Shadows */
-  --shadow-card-light: 0 20px 40px -15px rgba(15, 23, 42, 0.07), 0 0 0 1px rgba(15, 23, 42, 0.04);
-  --shadow-modal-light: 0 24px 48px -12px rgba(15, 23, 42, 0.18), 0 0 0 1px rgba(15, 23, 42, 0.06);
-  --shadow-popover-light: 0 12px 32px -4px rgba(15, 23, 42, 0.12), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
-  --shadow-blue-btn: 0 4px 14px 0 rgba(0, 122, 255, 0.35);
+  /* Corner Radii System (shadcn & Apple HIG Scale) */
+  --radius-xl: 20px;     /* Outer Studio Card Container */
+  --radius-lg: 12px;     /* Inputs / Dropzone / Cards */
+  --radius-md: 8px;      /* Buttons / Select Options */
+  --radius-sm: 6px;      /* Small Pills / Micro Controls */
+  --radius-full: 9999px; /* Capsule Badges */
+
+  --radius-outer: var(--radius-xl);
+  --radius-middle: var(--radius-lg);
+  --radius-inner: var(--radius-md);
+  --radius-pill: var(--radius-full);
+
+  /* Typography System Stack & 5-Level Typographic Scale */
+  --font-heading: 'Plus Jakarta Sans', 'Geist', -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Typographic Scale Tokens (W3C DTCG Standard) */
+  --font-size-title-lg: 1.125rem;  /* 18px / 24px - Header 品牌名大标题 */
+  --font-size-title-sm: 0.875rem;  /* 14px / 20px - 卡片 Header / Modal 标题 */
+  --font-size-body:     0.8125rem; /* 13px / 22px - 日报编辑器 / Commit 日志主文本 */
+  --font-size-control:  0.75rem;   /* 12px / 18px - 表单控件 / 按钮 / 筛选下拉框 */
+  --font-size-caption:  0.6875rem; /* 11px / 16px - 胶囊 Badge / 分类 Tag / 时间戳 */
+}
+
+/* ==========================================
+   Tier 2: Semantic Tokens (Adaptive Modes)
+   Aligning with shadcn/ui & Vercel Geist Architecture
+   ========================================== */
+:root {
+  --background: #fafafa;
+  --foreground: #09090b;
+
+  --card: rgba(255, 255, 255, 0.78);
+  --card-foreground: #09090b;
+
+  --popover: rgba(255, 255, 255, 0.78);
+  --popover-foreground: #09090b;
+
+  --primary: var(--color-brand-500);
+  --primary-foreground: #ffffff;
+
+  --muted: rgba(241, 245, 249, 0.7);
+  --muted-foreground: #71717a;
+
+  --border: rgba(0, 0, 0, 0.08);
+  --ring: var(--color-brand-glow);
+
+  /* Legacy Backward-Compatibility Aliases */
+  --bg-app: var(--background);
+  --bg-pane: var(--card);
+  --bg-pane-header: rgba(250, 250, 250, 0.6);
+  --bg-input: var(--muted);
+  --border-glass: var(--border);
+  --border-subtle: rgba(0, 0, 0, 0.06);
+
+  --text-primary: var(--foreground);
+  --text-secondary: #475569;
+  --text-muted: var(--muted-foreground);
+  --accent-primary: var(--primary);
+
+  --shadow-card: 0 20px 40px -15px rgba(0, 0, 0, 0.05), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+  --shadow-modal: 0 24px 48px -12px rgba(0, 0, 0, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+  --shadow-popover: 0 12px 32px -4px rgba(0, 0, 0, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+  --shadow-blue-btn: 0 4px 14px 0 rgba(0, 102, 255, 0.25);
 }
 
 .dark {
-  /* Apple Dark Mode Palette */
-  --bg-studio-dark: #060911;
-  --glass-pane-dark: rgba(15, 23, 42, 0.65);
-  --glass-header-dark: rgba(15, 23, 42, 0.35);
-  --border-glass-dark: rgba(255, 255, 255, 0.12);
-  --border-subtle-dark: rgba(255, 255, 255, 0.08);
+  --background: #09090b;
+  --foreground: #f4f4f5;
 
-  /* Apple Dark Ambient Shadows */
-  --shadow-card-dark: 0 24px 48px -16px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08);
-  --shadow-modal-dark: 0 40px 80px -20px rgba(0, 0, 0, 0.88), 0 0 0 1px rgba(255, 255, 255, 0.12);
-  --shadow-popover-dark: 0 20px 40px -8px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
-  --shadow-blue-btn: 0 4px 18px 0 rgba(0, 122, 255, 0.5);
+  --card: rgba(18, 18, 23, 0.75);
+  --card-foreground: #f4f4f5;
+
+  --popover: rgba(18, 18, 23, 0.75);
+  --popover-foreground: #f4f4f5;
+
+  --primary: var(--color-brand-400);
+  --primary-foreground: #ffffff;
+
+  --muted: rgba(24, 24, 30, 0.65);
+  --muted-foreground: #a1a1aa;
+
+  --border: rgba(255, 255, 255, 0.1);
+  --ring: var(--color-brand-glow);
+
+  /* Legacy Backward-Compatibility Aliases */
+  --bg-app: var(--background);
+  --bg-pane: var(--card);
+  --bg-pane-header: rgba(24, 24, 30, 0.5);
+  --bg-input: var(--muted);
+  --border-glass: var(--border);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+
+  --text-primary: var(--foreground);
+  --text-secondary: #cbd5e1;
+  --text-muted: var(--muted-foreground);
+  --accent-primary: var(--primary);
+
+  --shadow-card: 0 24px 48px -16px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  --shadow-modal: 0 40px 80px -20px rgba(0, 0, 0, 0.9), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  --shadow-popover: 0 20px 40px -8px rgba(0, 0, 0, 0.85), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  --shadow-blue-btn: 0 4px 18px 0 rgba(0, 102, 255, 0.4);
 
   color-scheme: dark;
 }
+
+/* shadcn/ui Standard Component Utility Helpers */
+.bg-background { background-color: var(--background); }
+.text-foreground { color: var(--foreground); }
+.bg-card { background-color: var(--card); }
+.text-card-foreground { color: var(--card-foreground); }
+.bg-popover { background-color: var(--popover); }
+.text-popover-foreground { color: var(--popover-foreground); }
+.bg-muted { background-color: var(--muted); }
+.text-muted-foreground { color: var(--muted-foreground); }
+.border-border { border-color: var(--border); }
+.ring-ring { box-shadow: 0 0 0 3px var(--ring); }
 
 .dark input[type="date"] {
   color-scheme: dark;
 }
 
-/* Global Reset & Ambient Mesh Canvas */
+/* Global Reset & Ambient Background Grid */
 html, body {
   min-height: 100%;
   margin: 0;
@@ -59,28 +159,40 @@ html, body {
 }
 
 body {
-  background: radial-gradient(circle at 50% 0%, rgba(0, 122, 255, 0.08), transparent 70%),
+  background: radial-gradient(circle at 50% 0%, rgba(0, 102, 255, 0.07), transparent 70%),
               radial-gradient(circle at 10% 30%, rgba(94, 92, 230, 0.04), transparent 60%),
-              linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+              linear-gradient(135deg, #fafafa 0%, #f4f4f5 50%, #e4e4e7 100%);
   background-attachment: fixed;
-  color: #0f172a;
+  color: var(--text-primary);
   font-size: 14px;
   line-height: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", sans-serif;
-  letter-spacing: -0.01em;
+  font-family: var(--font-body);
+  letter-spacing: -0.015em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .dark body {
-  background: radial-gradient(circle at 50% 0%, rgba(0, 122, 255, 0.18), transparent 75%),
-              radial-gradient(circle at 80% 20%, rgba(94, 92, 230, 0.1), transparent 65%),
-              linear-gradient(135deg, #050810 0%, #0c1220 50%, #060b18 100%);
+  background: radial-gradient(circle at 50% 0%, rgba(0, 102, 255, 0.15), transparent 75%),
+              radial-gradient(circle at 80% 20%, rgba(94, 92, 230, 0.08), transparent 65%),
+              linear-gradient(135deg, #09090b 0%, #121215 50%, #0d0d10 100%);
   background-attachment: fixed;
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
-/* Desktop Studio Locked Mode */
+/* Ambient Tech Grid Overlay */
+.dark body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 24px 24px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+}
+
+/* Desktop Studio Layout Mode */
 @media (min-width: 1024px) {
   html, body {
     height: 100vh;
@@ -88,35 +200,30 @@ body {
   }
 }
 
-/*  iOS Glass Navigation Bar */
+/* ==========================================
+   Tier 3: Component Classes & Utilities
+   ========================================== */
+
+/* Floating Glass Navigation Header */
 .ios-header {
-  background-color: rgba(255, 255, 255, 0.65);
+  background-color: var(--bg-pane-header);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-bottom: 1px solid var(--border-subtle-light);
-}
-.dark .ios-header {
-  background-color: rgba(12, 18, 32, 0.65);
-  border-bottom-color: var(--border-subtle-dark);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-/*  Studio Card Panes: Frosted Liquid Glass */
+/* Studio Card Panes: Frosted Liquid Glass Refraction */
 .studio-pane {
   border-radius: var(--radius-outer);
-  background-color: var(--glass-pane-light);
+  background-color: var(--bg-pane);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid var(--border-glass-light);
-  box-shadow: var(--shadow-card-light);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-card);
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.dark .studio-pane {
-  background-color: var(--glass-pane-dark);
-  border-color: var(--border-glass-dark);
-  box-shadow: var(--shadow-card-dark);
-}
 
-/*  Edge-to-Edge 44px Card Header Bar Component */
+/* Edge-to-Edge 44px Card Header Bar Component */
 .studio-card-header {
   height: 44px;
   min-height: 44px;
@@ -125,164 +232,253 @@ body {
   justify-content: space-between;
   padding-left: 1rem;
   padding-right: 1rem;
-  border-bottom: 1px solid var(--border-subtle-light);
-  background-color: var(--glass-header-light);
+  border-bottom: 1px solid var(--border-subtle);
+  background-color: var(--bg-pane-header);
   flex-shrink: 0;
 }
-.dark .studio-card-header {
-  border-bottom-color: var(--border-subtle-dark);
-  background-color: var(--glass-header-dark);
-}
 
-/*  Unified Header Title Component */
+/* Unified Header Title Component */
 .studio-pane-title {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.875rem; /* 14px */
+  font-family: var(--font-heading);
+  font-size: var(--font-size-title-sm); /* Level 2 Title: 14px */
   line-height: 1.25rem;
   font-weight: 800;
   letter-spacing: -0.015em;
-  color: #0f172a;
-}
-.dark .studio-pane-title {
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
 .studio-pane-title-icon {
   width: 1.125rem; /* 18px */
   height: 1.125rem;
-  color: #007AFF;
+  color: var(--accent-primary);
   flex-shrink: 0;
 }
 
-/*  iOS Capsule Badge Pill */
+/* Capsule Badge Pill */
 .studio-badge-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
   padding: 0.2rem 0.625rem;
-  font-size: 0.6875rem; /* 11px */
+  font-size: var(--font-size-caption); /* Level 5 Caption: 11px */
   font-weight: 700;
   border-radius: var(--radius-pill);
-  background-color: rgba(0, 122, 255, 0.12);
-  color: #007AFF;
-  border: 1px solid rgba(0, 122, 255, 0.15);
+  background-color: var(--color-brand-subtle);
+  color: var(--accent-primary);
+  border: 1px solid rgba(0, 102, 255, 0.15);
   transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
-.dark .studio-badge-pill {
-  background-color: rgba(0, 122, 255, 0.18);
-  color: #38bdf8;
-  border-color: rgba(0, 122, 255, 0.25);
+
+/* Universal Icon Action Button */
+.studio-icon-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: var(--radius-middle);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, border-color 0.15s ease;
+}
+.studio-icon-btn:hover {
+  transform: scale(1.05);
+  border-color: var(--accent-primary);
+}
+.studio-icon-btn:active {
+  transform: scale(0.95);
 }
 
-/*  Drop Zone Styling */
+/* Drop Zone Styling */
 .drop-zone-box {
   border-radius: var(--radius-middle);
-  background-color: rgba(0, 122, 255, 0.03);
-  border: 2px dashed rgba(0, 122, 255, 0.25);
+  background-color: var(--color-brand-subtle);
+  border: 2px dashed rgba(0, 102, 255, 0.25);
   transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .drop-zone-box:hover {
-  background-color: rgba(0, 122, 255, 0.08);
-  border-color: #007AFF;
+  background-color: rgba(0, 102, 255, 0.12);
+  border-color: var(--accent-primary);
   transform: translateY(-1px);
 }
-.dark .drop-zone-box {
-  background-color: rgba(0, 122, 255, 0.05);
-  border-color: rgba(0, 122, 255, 0.3);
-}
-.dark .drop-zone-box:hover {
-  background-color: rgba(0, 122, 255, 0.12);
-  border-color: #38bdf8;
-}
 
-/*  Input Controls & Textareas */
+/* Input Controls & Textareas */
 .ios-input-box {
   border-radius: var(--radius-middle);
-  background-color: rgba(241, 245, 249, 0.7);
-  border: 1px solid rgba(203, 213, 225, 0.6);
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
   transition: background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.dark .ios-input-box {
-  background-color: rgba(30, 41, 59, 0.5);
-  border-color: rgba(51, 65, 85, 0.6);
-}
 .ios-input-box:focus, .ios-input-box:focus-within {
-  border-color: #007AFF;
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25);
-  background-color: rgba(255, 255, 255, 0.9);
-}
-.dark .ios-input-box:focus, .dark .ios-input-box:focus-within {
-  background-color: rgba(15, 23, 42, 0.8);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--color-brand-glow);
 }
 
 .studio-editor-textarea {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Mono", "PingFang SC", monospace;
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-body); /* Level 3 Body: 13px */
   line-height: 22px;
   letter-spacing: -0.01em;
 }
 
-/*  Commit Item List Cell */
+/* Commit Item List Cell & Staggered Reveal */
 .commit-item {
   border-radius: var(--radius-middle);
-  border: 1px solid transparent;
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid var(--border-subtle);
+  background-color: var(--bg-pane);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .commit-item:hover {
-  background-color: rgba(255, 255, 255, 0.8);
-  border-color: rgba(203, 213, 225, 0.8);
-  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.05);
-  transform: translateY(-1px);
+  background-color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 102, 255, 0.3);
+  box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1.5px);
 }
 .dark .commit-item:hover {
-  background-color: rgba(30, 41, 59, 0.7);
-  border-color: rgba(51, 65, 85, 0.7);
-  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.4);
+  background-color: rgba(24, 24, 32, 0.85);
+  border-color: rgba(0, 102, 255, 0.35);
+  box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 0 15px 0 rgba(0, 102, 255, 0.1);
 }
 
-/*  Standardized Form Control Typography & Alignment (Date Input & Select Trigger) */
+@keyframes commitItemCascade {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.commit-item-enter {
+  animation: commitItemCascade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Category Badge Lights (Frontend Aesthetics Single Accent System) */
+.commit-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  font-size: var(--font-size-caption); /* Level 5 Caption: 11px */
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background-color: rgba(161, 161, 170, 0.16);
+  color: #a1a1aa;
+  border: 1px solid rgba(161, 161, 170, 0.3);
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.commit-tag-feat {
+  background-color: rgba(52, 211, 153, 0.16);
+  color: #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+.commit-tag-fix {
+  background-color: rgba(251, 113, 133, 0.16);
+  color: #fb7185;
+  border: 1px solid rgba(251, 113, 133, 0.3);
+}
+.commit-tag-docs {
+  background-color: rgba(56, 189, 248, 0.16);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+.commit-tag-refactor {
+  background-color: rgba(192, 132, 252, 0.16);
+  color: #c084fc;
+  border: 1px solid rgba(192, 132, 252, 0.3);
+}
+.commit-tag-style {
+  background-color: rgba(244, 114, 182, 0.16);
+  color: #f472b6;
+  border: 1px solid rgba(244, 114, 182, 0.3);
+}
+.commit-tag-test {
+  background-color: rgba(45, 212, 191, 0.16);
+  color: #2dd4bf;
+  border: 1px solid rgba(45, 212, 191, 0.3);
+}
+.commit-tag-perf {
+  background-color: rgba(251, 191, 36, 0.16);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+.commit-tag-ci {
+  background-color: rgba(129, 140, 248, 0.16);
+  color: #818cf8;
+  border: 1px solid rgba(129, 140, 248, 0.3);
+}
+.commit-tag-build {
+  background-color: rgba(251, 146, 60, 0.16);
+  color: #fb923c;
+  border: 1px solid rgba(251, 146, 60, 0.3);
+}
+.commit-tag-chore {
+  background-color: rgba(161, 161, 170, 0.16);
+  color: #a1a1aa;
+  border: 1px solid rgba(161, 161, 170, 0.3);
+}
+
+/* Metric Counter Dashboard Card */
+.stat-card-box {
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-middle);
+  padding: 0.625rem 0.75rem;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.stat-card-box:hover {
+  border-color: var(--color-brand-glow);
+  transform: translateY(-1px);
+}
+.stat-card-value {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+/* Standardized Form Control Typography & Alignment */
 .ios-form-control {
   width: 100%;
   height: 38px;
   min-height: 38px;
   padding: 0 12px;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang SC", sans-serif !important;
-  font-size: 12px !important;
+  font-family: var(--font-body) !important;
+  font-size: var(--font-size-control) !important; /* Level 4 Control: 12px */
   font-weight: 600 !important;
   line-height: 36px !important;
   letter-spacing: -0.01em;
   border-radius: var(--radius-middle);
-  background-color: rgba(241, 245, 249, 0.7);
-  border: 1px solid rgba(203, 213, 225, 0.6);
-  color: #0f172a;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
   transition: background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
 }
-.dark .ios-form-control {
-  background-color: rgba(30, 41, 59, 0.5);
-  border-color: rgba(51, 65, 85, 0.6);
-  color: #f8fafc;
-}
 .ios-form-control:focus, .ios-form-control:focus-within {
-  border-color: #007AFF;
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25);
-  background-color: rgba(255, 255, 255, 0.9);
-}
-.dark .ios-form-control:focus, .dark .ios-form-control:focus-within {
-  background-color: rgba(15, 23, 42, 0.8);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--color-brand-glow);
 }
 
-/*  WebKit Native Date Picker Shadow DOM Alignment (Forces Exact 12px SF Pro Font) */
+/* WebKit Native Date Picker Shadow DOM Alignment */
 input[type="date"]::-webkit-datetime-edit,
 input[type="date"]::-webkit-datetime-edit-fields-wrapper,
 input[type="date"]::-webkit-datetime-edit-text,
 input[type="date"]::-webkit-datetime-edit-month-field,
 input[type="date"]::-webkit-datetime-edit-day-field,
 input[type="date"]::-webkit-datetime-edit-year-field {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", sans-serif !important;
-  font-size: 12px !important;
+  font-family: var(--font-body) !important;
+  font-size: var(--font-size-control) !important; /* Level 4 Control: 12px */
   font-weight: 600 !important;
   line-height: 20px !important;
   letter-spacing: -0.01em !important;
@@ -301,7 +497,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
 
-/*  Standardized Studio Button System (Height 38px, Uniform Radii & Micro-interactions) */
+/* Standardized Studio Button System */
 .studio-btn {
   height: 38px;
   min-height: 38px;
@@ -310,8 +506,8 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   align-items: center;
   justify-content: center;
   gap: 0.375rem; /* 6px */
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif;
-  font-size: 12px;
+  font-family: var(--font-body);
+  font-size: var(--font-size-control); /* Level 4 Control: 12px */
   font-weight: 700;
   letter-spacing: -0.01em;
   border-radius: var(--radius-middle);
@@ -320,42 +516,76 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease;
 }
 .studio-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
 .studio-btn-primary {
-  background-color: #007AFF;
+  position: relative;
+  background: linear-gradient(135deg, var(--color-brand-500) 0%, var(--color-brand-600) 100%);
   color: #ffffff;
-  border: 1px solid rgba(0, 122, 255, 0.2);
-  box-shadow: 0 2px 8px 0 rgba(0, 122, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-blue-btn);
+  overflow: hidden;
+}
+.studio-btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.75s ease;
+}
+.studio-btn-primary:hover::before {
+  left: 150%;
 }
 .studio-btn-primary:hover {
-  background-color: #0062cc;
-  box-shadow: 0 4px 14px 0 rgba(0, 122, 255, 0.4);
+  background: linear-gradient(135deg, #005ce6 0%, #0047b3 100%);
+  box-shadow: 0 6px 18px 0 rgba(0, 102, 255, 0.45);
   transform: translateY(-1px);
 }
 
 .studio-btn-secondary {
-  background-color: rgba(241, 245, 249, 0.8);
-  color: #0f172a;
-  border: 1px solid rgba(203, 213, 225, 0.8);
-}
-.dark .studio-btn-secondary {
-  background-color: rgba(30, 41, 59, 0.6);
-  color: #f8fafc;
-  border-color: rgba(51, 65, 85, 0.6);
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
 }
 .studio-btn-secondary:hover {
-  background-color: rgba(226, 232, 240, 0.9);
+  background-color: rgba(228, 228, 231, 0.9);
   transform: translateY(-1px);
 }
 .dark .studio-btn-secondary:hover {
-  background-color: rgba(51, 65, 85, 0.8);
+  background-color: rgba(38, 38, 48, 0.8);
 }
 
-/*  Authentic iOS Segmented Control Active State */
+/* Modal Overlay & Glass Card Utilities */
+.studio-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 1rem;
+}
+
+.studio-modal-glass {
+  background-color: var(--bg-pane);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-modal);
+  border-radius: var(--radius-outer);
+}
+
+/* iOS Segmented Control Active State */
 .settings-tab-btn {
-  border-radius: 8px;
+  border-radius: var(--radius-inner);
   transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .settings-tab-btn.active-settings-tab {
@@ -369,7 +599,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.4) !important;
 }
 
-/*  Interactive Spring Pressure Scale */
+/* Interactive Spring Pressure Scale */
 .ios-press-action {
   transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -393,7 +623,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   background: rgba(148, 163, 184, 0.5);
 }
 
-/*  Authentic Apple iOS Popover Context Menu & Custom Select System */
+/* Custom Select System */
 .custom-select-container {
   position: relative;
 }
@@ -406,30 +636,26 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   justify-content: space-between;
   padding-left: 12px;
   padding-right: 10px;
+  font-family: var(--font-body);
+  font-size: var(--font-size-control); /* Level 4 Control: 12px */
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
   cursor: pointer;
-  background-color: rgba(241, 245, 249, 0.7);
-  border: 1px solid rgba(203, 213, 225, 0.6);
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-middle);
   transition: background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
 }
-.dark .custom-select-trigger {
-  background-color: rgba(30, 41, 59, 0.5);
-  border-color: rgba(51, 65, 85, 0.6);
-}
 .custom-select-trigger:hover {
-  border-color: rgba(0, 122, 255, 0.5);
+  border-color: var(--accent-primary);
 }
 .custom-select-container.open .custom-select-trigger {
-  border-color: #007AFF;
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.25);
-  background-color: rgba(255, 255, 255, 0.9);
-}
-.dark .custom-select-container.open .custom-select-trigger {
-  background-color: rgba(15, 23, 42, 0.8);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--color-brand-glow);
 }
 
-/* Chevron Icon Fixed iOS Micro Scale (14px) */
 .custom-select-chevron {
   width: 14px !important;
   height: 14px !important;
@@ -440,10 +666,9 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 .custom-select-container.open .custom-select-chevron {
   transform: rotate(180deg);
   opacity: 0.9;
-  color: #007AFF;
+  color: var(--accent-primary);
 }
 
-/* iOS HIG Popover Menu Glass Container with Strict Inset Padding */
 .custom-select-dropdown {
   position: absolute;
   top: calc(100% + 6px);
@@ -452,19 +677,13 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   z-index: 70;
   display: none;
   border-radius: var(--radius-middle);
-  background-color: rgba(255, 255, 255, 0.92);
+  background-color: var(--bg-pane);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: var(--shadow-popover-light);
+  border: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-popover);
   overflow: hidden;
-  padding: 6px; /* iOS Spaced Inset Padding */
-  space-y: 4px;
-}
-.dark .custom-select-dropdown {
-  background-color: rgba(15, 23, 42, 0.92);
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: var(--shadow-popover-dark);
+  padding: 6px;
 }
 .custom-select-container.open .custom-select-dropdown {
   display: block;
@@ -475,13 +694,12 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* iOS HIG Inset Spaced Option Items with Margin Gaps */
 .custom-select-option {
   padding: 7px 10px;
   margin-bottom: 3px;
   font-size: 12px;
   font-weight: 600;
-  border-radius: 8px; /* Inset rounded option box */
+  border-radius: var(--radius-inner);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -492,56 +710,74 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   margin-bottom: 0;
 }
 .custom-select-option:hover {
-  background-color: rgba(0, 122, 255, 0.1);
-  color: #007AFF;
-}
-.dark .custom-select-option:hover {
-  background-color: rgba(0, 122, 255, 0.18);
-  color: #38bdf8;
+  background-color: var(--color-brand-subtle);
+  color: var(--accent-primary);
 }
 .custom-select-option.selected {
-  background-color: rgba(0, 122, 255, 0.15);
-  color: #007AFF;
+  background-color: rgba(0, 102, 255, 0.15);
+  color: var(--accent-primary);
   font-weight: 700;
-}
-.dark .custom-select-option.selected {
-  background-color: rgba(0, 122, 255, 0.22);
-  color: #38bdf8;
 }
 .custom-select-option .check-icon {
   width: 14px !important;
   height: 14px !important;
   display: none;
-  color: #007AFF;
-}
-.dark .custom-select-option .check-icon {
-  color: #38bdf8;
+  color: var(--accent-primary);
 }
 .custom-select-option.selected .check-icon {
   display: inline-block;
 }
 
-/* Toast Message Overlay */
+/* Toast Message Overlay & Spring Entrance */
 .toast-msg {
   background-color: rgba(15, 23, 42, 0.88);
   backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   color: #ffffff;
   padding: 10px 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-middle);
   font-size: 12px;
   font-weight: 700;
-  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 36px -4px rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.15);
+  animation: toastSpringIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-/*  Tabular Numbers Utility */
+@keyframes toastSpringIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* AI Fluid Generation Breathing Glow Animation */
+@keyframes reportGeneratingGlow {
+  0%, 100% {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 3px var(--color-brand-glow);
+  }
+  50% {
+    border-color: rgba(168, 85, 247, 0.8);
+    box-shadow: 0 0 0 5px rgba(168, 85, 247, 0.25);
+  }
+}
+
+.is-generating-report {
+  animation: reportGeneratingGlow 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite !important;
+}
+
+/* Tabular Numbers Utility */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
   -webkit-font-feature-settings: "tnum";
   font-feature-settings: "tnum";
 }
 
-/*  Accessibility: Prefers Reduced Motion */
+/* Accessibility: Prefers Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
