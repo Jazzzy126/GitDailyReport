@@ -55,48 +55,48 @@
         role="dialog"
         aria-modal="true"
         aria-labelledby="commit-modal-title"
-        class="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all duration-300">
-        <div class="commit-modal-box studio-modal-box w-full max-w-xl p-6 space-y-4 rounded-3xl studio-pane shadow-2xl relative max-h-[92vh] overflow-y-auto custom-scrollbar border border-white/20">
+        class="studio-modal-overlay">
+        <div class="commit-modal-box studio-modal-glass w-full max-w-xl p-6 space-y-4 relative max-h-[92vh] overflow-y-auto custom-scrollbar">
           <button
             type="button"
             @click="close"
             aria-label="关闭提交详情"
-            class="absolute right-4 top-4 w-8 h-8 rounded-full ios-input-box flex items-center justify-center text-slate-400 hover:text-slate-600 font-bold text-sm cursor-pointer hover:rotate-90 transition duration-200 focus-visible:ring-2 focus-visible:ring-[#007AFF]">
+            class="absolute right-4 top-4 studio-icon-btn text-xs font-bold hover:rotate-90">
             ✕
           </button>
 
           <!-- Modal Header -->
           <div class="flex items-center gap-3 border-b border-black/5 dark:border-white/10 pb-3">
-            <div class="w-10 h-10 rounded-2xl bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center shrink-0">
-              <i data-lucide="git-commit" class="w-5 h-5" aria-hidden="true"></i>
+            <div class="w-10 h-10 rounded-2xl bg-[var(--color-brand-subtle)] text-[var(--accent-primary)] flex items-center justify-center shrink-0">
+              <studio-icon name="git-commit" class="w-5 h-5"></studio-icon>
             </div>
             <div>
-              <h2 id="commit-modal-title" class="font-extrabold text-base">Git 提交元数据明细</h2>
-              <span class="text-xs opacity-50 font-medium">iOS Inset Grouped Commit Inspector</span>
+              <h2 id="commit-modal-title" class="font-extrabold text-base font-sans">Git 提交元数据明细</h2>
+              <span class="text-xs opacity-50 font-medium">Studio Pro Commit Inspector</span>
             </div>
           </div>
 
           <!-- Section 1: Inset Grouped SHA Card -->
-          <div class="p-4 ios-input-box rounded-2xl space-y-3 text-xs">
-            <div class="flex items-center justify-between border-b border-black/5 dark:border-white/5 pb-2">
+          <div class="p-3.5 ios-input-box rounded-2xl space-y-2.5 text-xs">
+            <div class="flex items-center justify-between border-b border-black/5 dark:border-white/5 pb-2.5">
               <span class="text-xs opacity-50 font-bold uppercase tracking-wider">Commit 40位 Checksum</span>
               <button
                 type="button"
                 @click="$emit('copy-sha')"
                 aria-label="复制 Commit Hash 校验码"
-                class="text-xs text-[#007AFF] hover:underline font-bold flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#007AFF] rounded px-1">
-                <i data-lucide="copy" class="w-3.5 h-3.5" aria-hidden="true"></i>
+                class="text-xs text-[var(--accent-primary)] hover:underline font-bold flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] rounded px-1">
+                <studio-icon name="copy" class="w-3.5 h-3.5"></studio-icon>
                 <span>复制 Hash</span>
               </button>
             </div>
-            <div class="font-mono text-xs font-bold text-[#007AFF] dark:text-[#38bdf8] break-all select-all tabular-nums">
+            <div class="font-mono text-xs font-bold text-[var(--accent-primary)] break-all select-all tabular-nums">
               {{ commit?.fullHash || commit?.hash || '--' }}
             </div>
           </div>
 
           <!-- Section 2: Inset Grouped Key-Value List Card -->
-          <div class="p-4 ios-input-box rounded-2xl space-y-3 text-xs divide-y divide-black/5 dark:divide-white/5">
-            <div class="flex items-center justify-between pt-1 first:pt-0">
+          <div class="px-4 py-1 ios-input-box rounded-2xl text-xs divide-y divide-black/5 dark:divide-white/5">
+            <div class="flex items-center justify-between py-2.5">
               <span class="opacity-60 font-medium">提交作者 (Author & Email)</span>
               <span class="font-bold truncate max-w-72">
                 {{ commit?.author || '未知' }}
@@ -104,7 +104,7 @@
               </span>
             </div>
 
-            <div class="flex items-center justify-between pt-3">
+            <div class="flex items-center justify-between py-2.5">
               <span class="opacity-60 font-medium">提交精确时间 (Date & Timezone)</span>
               <span class="font-bold font-mono tabular-nums">
                 {{ commit?.date }} {{ commit?.time }}
@@ -112,28 +112,28 @@
               </span>
             </div>
 
-            <div class="flex items-center justify-between pt-3">
+            <div class="flex items-center justify-between py-2.5">
               <span class="opacity-60 font-medium">规范分类 (Category)</span>
-              <span class="font-bold text-[#007AFF]">
+              <span class="font-bold text-[var(--accent-primary)]">
                 {{ commit?.typeInfo ? commit.typeInfo.label : (commit?.type || '--') }}
               </span>
             </div>
 
-            <div class="flex items-center justify-between pt-3">
+            <div class="flex items-center justify-between py-2.5">
               <span class="opacity-60 font-medium">Git 动作 (Action)</span>
               <span class="font-bold uppercase font-mono">
                 {{ commit?.action || 'commit' }}
               </span>
             </div>
 
-            <div class="flex items-center justify-between pt-3">
+            <div class="flex items-center justify-between py-2.5">
               <span class="opacity-60 font-medium">Unix 时间戳 (Timestamp)</span>
               <span class="font-mono font-bold opacity-80 tabular-nums">
                 {{ commit?.timestamp ? commit.timestamp + ' (Sec)' : '--' }}
               </span>
             </div>
 
-            <div class="flex items-center justify-between pt-3">
+            <div class="flex items-center justify-between py-2.5">
               <span class="opacity-60 font-medium">父级 Commit (Parent SHA)</span>
               <span class="font-mono font-bold truncate max-w-56 opacity-80 tabular-nums" :title="commit?.prevHash">
                 {{ commit?.prevHash || '--' }}
@@ -149,8 +149,8 @@
                 type="button"
                 @click="$emit('copy-msg')"
                 aria-label="复制完整 Commit 日志"
-                class="text-xs text-[#007AFF] hover:underline font-bold flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#007AFF] rounded px-1">
-                <i data-lucide="copy" class="w-3.5 h-3.5" aria-hidden="true"></i>
+                class="text-xs text-[var(--accent-primary)] hover:underline font-bold flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] rounded px-1">
+                <studio-icon name="copy" class="w-3.5 h-3.5"></studio-icon>
                 <span>复制日志</span>
               </button>
             </div>
@@ -159,26 +159,26 @@
             </div>
           </div>
 
-          <!-- Section 4: Raw Log Line Expandable Box -->
-          <div class="border-t border-black/5 dark:border-white/10 pt-2">
+          <!-- Section 4: Raw Log Line Expandable Inset Card -->
+          <div class="p-3.5 ios-input-box rounded-2xl">
             <details class="group">
-              <summary class="text-xs font-bold opacity-50 cursor-pointer hover:opacity-100 flex items-center justify-between select-none focus-visible:ring-2 focus-visible:ring-[#007AFF] rounded p-1">
+              <summary class="text-xs font-bold opacity-60 cursor-pointer hover:opacity-100 flex items-center justify-between select-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] rounded">
                 <span>查看 100% 原始 Git 日报底层数据 (Raw Log Line)</span>
-                <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition group-open:rotate-180" aria-hidden="true"></i>
+                <studio-icon name="chevron-down" class="w-3.5 h-3.5 transition group-open:rotate-180 text-[var(--accent-primary)]"></studio-icon>
               </summary>
-              <div class="mt-2 p-3 ios-input-box rounded-xl font-mono text-xs opacity-70 break-all select-all bg-slate-100 dark:bg-slate-950 tabular-nums">
+              <div class="mt-2.5 p-3 rounded-xl font-mono text-xs opacity-80 break-all select-all bg-black/5 dark:bg-white/5 tabular-nums">
                 {{ commit?.rawLine || ('commit ' + (commit?.fullHash || commit?.hash || '')) }}
               </div>
             </details>
           </div>
 
           <!-- Modal Footer -->
-          <div class="flex items-center justify-end pt-2 border-t border-black/5 dark:border-white/10">
+          <div class="flex items-center justify-end pt-3 border-t border-black/5 dark:border-white/10">
             <button
               type="button"
               @click="close"
               aria-label="关闭对话框"
-              class="ios-btn px-6 py-2 bg-[#007AFF] text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer hover:scale-105 active:scale-95 transition focus-visible:ring-2 focus-visible:ring-[#007AFF]">
+              class="studio-btn studio-btn-primary px-6 focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]">
               确定
             </button>
           </div>

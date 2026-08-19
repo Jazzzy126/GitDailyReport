@@ -239,6 +239,8 @@
         isMultiRepoMode: repos.isMultiRepoMode,
         mergedCommits: repos.mergedCommits,
         isRefreshing: repos.isRefreshing,
+        isDropzoneCollapsed: repos.isDropzoneCollapsed,
+        toggleDropzone: repos.toggleDropzone,
         getRepoDisplayName: repos.getRepoDisplayName,
         promptEditAlias: repos.promptEditAlias,
         toggleRepoSelection: repos.toggleRepoSelection,

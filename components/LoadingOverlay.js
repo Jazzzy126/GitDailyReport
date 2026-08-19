@@ -22,9 +22,9 @@
           v-if="isLoading" 
           role="status"
           aria-live="polite"
-          class="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 transition-all duration-300">
-          <div class="studio-pane px-6 py-5 rounded-2xl shadow-2xl flex flex-col items-center gap-3 border border-white/20 max-w-xs text-center animate-pulse">
-            <i data-lucide="loader-2" class="w-8 h-8 text-[#007AFF] animate-spin" aria-hidden="true"></i>
+          class="studio-modal-overlay">
+          <div class="studio-modal-glass px-6 py-5 rounded-2xl flex flex-col items-center gap-3 max-w-xs text-center animate-pulse">
+            <studio-icon name="loader-2" class="w-8 h-8 text-[var(--accent-primary)] animate-spin"></studio-icon>
             <span class="text-xs font-bold tracking-wide">{{ message }}</span>
           </div>
         </div>
