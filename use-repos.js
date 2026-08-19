@@ -67,8 +67,13 @@
     const selectedRepoNames = ref([]);
     const repoAliases = ref({});
     const isRefreshing = ref(false);
+    const isDropzoneCollapsed = ref(false);
     const allRepoMap = reactive(new Map()); // repoName -> commits array
     const repoHandlesMap = new Map(); // repoName -> FileSystemDirectoryHandle (in-memory)
+
+    function toggleDropzone() {
+      isDropzoneCollapsed.value = !isDropzoneCollapsed.value;
+    }
 
     // 1. Alias Helpers
     function loadAliases() {
@@ -640,6 +645,8 @@
       selectedRepoNames,
       repoAliases,
       isRefreshing,
+      isDropzoneCollapsed,
+      toggleDropzone,
       mergedCommits,
       isMultiRepoMode,
       currentRepoBadgeText,
