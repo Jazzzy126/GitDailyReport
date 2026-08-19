@@ -134,14 +134,14 @@
         return;
       }
 
-      let loadingText = '✨ AI 正在为您精炼归纳 2-3 条日报...';
+      let loadingText = '✨ AI 正在为您精炼归纳 2-3 条日报…';
       if (aiConfig.itemCount === '3-5') {
-        loadingText = '✨ AI 正在为您提炼 3-5 条日报...';
+        loadingText = '✨ AI 正在为您提炼 3-5 条日报…';
       } else if (aiConfig.itemCount === '5-8') {
-        loadingText = '✨ AI 正在为您提炼 5-8 条日报...';
+        loadingText = '✨ AI 正在为您提炼 5-8 条日报…';
       } else if (aiConfig.itemCount === 'auto') {
         const targetStr = window.AIService.getAdaptiveTargetCountStr(commits.length);
-        loadingText = `✨ AI 正在根据 ${commits.length} 条提交自适应归纳 ${targetStr} 条日报...`;
+        loadingText = `✨ AI 正在根据 ${commits.length} 条提交自适应归纳 ${targetStr} 条日报…`;
       }
 
       showLoading(loadingText);
@@ -154,7 +154,7 @@
         const result = await window.AIService.generateReport(commitsWithDisplayName);
         hideLoading();
 
-        // Typewriter streaming effect with confetti
+        // Typewriter streaming effect
         if (motion && motion.runTypewriter) {
           isTyping.value = true;
           reportOutput.value = '';
@@ -164,13 +164,11 @@
             (curr) => { reportOutput.value = curr; },
             () => {
               isTyping.value = false;
-              if (motion.triggerConfetti) motion.triggerConfetti('celebrate');
               showToast('🎉 AI 已为您生成精炼日报！');
             }
           );
         } else {
           reportOutput.value = result;
-          if (motion && motion.triggerConfetti) motion.triggerConfetti('celebrate');
           showToast('🎉 AI 已为您生成精炼日报！');
         }
       } catch (err) {
@@ -188,7 +186,6 @@
       }
       const plainText = stripMarkdownToPlain(text);
       navigator.clipboard.writeText(plainText);
-      if (motion && motion.triggerConfetti) motion.triggerConfetti('standard');
       showToast('📝 已复制纯文本 (已去除 Markdown 符号)');
     }
 
@@ -199,7 +196,6 @@
         return;
       }
       navigator.clipboard.writeText(text);
-      if (motion && motion.triggerConfetti) motion.triggerConfetti('standard');
       showToast('📄 Markdown 已复制');
     }
 

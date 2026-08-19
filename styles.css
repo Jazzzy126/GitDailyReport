@@ -108,7 +108,7 @@ body {
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid var(--border-glass-light);
   box-shadow: var(--shadow-card-light);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .dark .studio-pane {
   background-color: var(--glass-pane-dark);
@@ -168,7 +168,7 @@ body {
   background-color: rgba(0, 122, 255, 0.12);
   color: #007AFF;
   border: 1px solid rgba(0, 122, 255, 0.15);
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 .dark .studio-badge-pill {
   background-color: rgba(0, 122, 255, 0.18);
@@ -181,7 +181,7 @@ body {
   border-radius: var(--radius-middle);
   background-color: rgba(0, 122, 255, 0.03);
   border: 2px dashed rgba(0, 122, 255, 0.25);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .drop-zone-box:hover {
   background-color: rgba(0, 122, 255, 0.08);
@@ -202,7 +202,7 @@ body {
   border-radius: var(--radius-middle);
   background-color: rgba(241, 245, 249, 0.7);
   border: 1px solid rgba(203, 213, 225, 0.6);
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .dark .ios-input-box {
   background-color: rgba(30, 41, 59, 0.5);
@@ -228,7 +228,7 @@ body {
 .commit-item {
   border-radius: var(--radius-middle);
   border: 1px solid transparent;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .commit-item:hover {
   background-color: rgba(255, 255, 255, 0.8);
@@ -257,7 +257,7 @@ body {
   background-color: rgba(241, 245, 249, 0.7);
   border: 1px solid rgba(203, 213, 225, 0.6);
   color: #0f172a;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   box-sizing: border-box;
 }
 .dark .ios-form-control {
@@ -317,7 +317,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   border-radius: var(--radius-middle);
   cursor: pointer;
   user-select: none;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease;
 }
 .studio-btn:active {
   transform: scale(0.96);
@@ -356,7 +356,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 /*  Authentic iOS Segmented Control Active State */
 .settings-tab-btn {
   border-radius: 8px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .settings-tab-btn.active-settings-tab {
   background-color: #ffffff !important;
@@ -410,7 +410,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   background-color: rgba(241, 245, 249, 0.7);
   border: 1px solid rgba(203, 213, 225, 0.6);
   border-radius: var(--radius-middle);
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
 }
 .dark .custom-select-trigger {
@@ -486,7 +486,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  transition: all 0.12s ease;
+  transition: background-color 0.12s ease, color 0.12s ease;
 }
 .custom-select-option:last-child {
   margin-bottom: 0;
@@ -532,4 +532,33 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   font-weight: 700;
   box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/*  Tabular Numbers Utility */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  -webkit-font-feature-settings: "tnum";
+  font-feature-settings: "tnum";
+}
+
+/*  Accessibility: Prefers Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  #vanta-bg {
+    display: none !important;
+  }
+
+  .animate-pulse,
+  .animate-spin,
+  .animate-bounce {
+    animation: none !important;
+  }
 }

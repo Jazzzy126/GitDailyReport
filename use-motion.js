@@ -8,41 +8,9 @@
   function useMotion() {
     let vantaEffect = null;
 
-    // 1. Confetti Particle Bursts (Apple Palette)
-    function triggerConfetti(mode = 'standard') {
-      if (typeof window.confetti !== 'function') return;
-
-      if (mode === 'celebrate') {
-        // High energy burst for AI Report Generation
-        const count = 200;
-        const defaults = {
-          origin: { y: 0.7 },
-          colors: ['#007AFF', '#5856D6', '#34C759', '#FF9500', '#AF52DE', '#38BDF8']
-        };
-
-        function fire(particleRatio, opts) {
-          window.confetti({
-            ...defaults,
-            ...opts,
-            particleCount: Math.floor(count * particleRatio)
-          });
-        }
-
-        fire(0.25, { spread: 26, startVelocity: 55 });
-        fire(0.2, { spread: 60 });
-        fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
-        fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
-        fire(0.1, { spread: 120, startVelocity: 45 });
-      } else {
-        // Subtle burst for copy actions
-        window.confetti({
-          particleCount: 40,
-          spread: 45,
-          startVelocity: 35,
-          origin: { y: 0.85, x: 0.8 },
-          colors: ['#007AFF', '#34C759', '#38BDF8']
-        });
-      }
+    // 1. Confetti Particle Bursts (Disabled)
+    function triggerConfetti() {
+      // Confetti disabled per user request
     }
 
     // 2. iOS Spring Modal Animation
