@@ -7,6 +7,58 @@
   const RECENT_REPOS_KEY = 'git_daily_report_recent_repos';
   const REPO_ALIASES_KEY = 'git_daily_report_repo_aliases';
   const SELECTED_REPOS_KEY = 'git_daily_report_selected_repo_names';
+  const DB_NAME = 'GitDailyReport_HandlesDB';
+  const STORE_NAME = 'repo_handles';
+
+  // IndexedDB Helper for FileSystemDirectoryHandle Persistence
+  function openHandlesDB() {
+    return new Promise((resolve) => {
+      if (!window.indexedDB) {
+        resolve(null);
+        return;
+      }
+      const req = window.indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: 'repoName' });
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = (e) => {
+        console.warn('[IndexedDB] 打开数据库失败:', e);
+        resolve(null);
+      };
+    });
+  }
+
+  async function saveHandleToDB(repoName, handle) {
+    if (!repoName || !handle) return;
+    try {
+      const db = await openHandlesDB();
+      if (!db) return;
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).put({ repoName, handle, updatedAt: Date.now() });
+    } catch (e) {
+      console.warn('[IndexedDB] 存储目录句柄失败:', e);
+    }
+  }
+
+  async function getHandleFromDB(repoName) {
+    if (!repoName) return null;
+    try {
+      const db = await openHandlesDB();
+      if (!db) return null;
+      return new Promise((resolve) => {
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const req = tx.objectStore(STORE_NAME).get(repoName);
+        req.onsuccess = () => resolve(req.result ? req.result.handle : null);
+        req.onerror = () => resolve(null);
+      });
+    } catch (e) {
+      return null;
+    }
+  }
 
   function useRepos({ showToast, showLoading, hideLoading }) {
     const { ref, reactive, computed, watch } = window.Vue;
@@ -14,7 +66,9 @@
     const recentRepos = ref([]);
     const selectedRepoNames = ref([]);
     const repoAliases = ref({});
+    const isRefreshing = ref(false);
     const allRepoMap = reactive(new Map()); // repoName -> commits array
+    const repoHandlesMap = new Map(); // repoName -> FileSystemDirectoryHandle (in-memory)
 
     // 1. Alias Helpers
     function loadAliases() {
@@ -97,7 +151,7 @@
       } catch (e) { }
     }
 
-    function initRepoState() {
+    async function initRepoState() {
       loadAliases();
       loadRecentRepos();
 
@@ -113,7 +167,17 @@
         } else {
           selectedRepoNames.value = recentRepos.value.map(r => r.repoName);
         }
+
+        // Preload directory handles from IndexedDB
+        for (const r of recentRepos.value) {
+          const handle = await getHandleFromDB(r.repoName);
+          if (handle) {
+            repoHandlesMap.set(r.repoName, handle);
+          }
+        }
       }
+
+      setupWindowFocusAutoRefresh();
     }
 
     // 3. Selection Actions
@@ -180,15 +244,109 @@
       saveRepoToRecent(targetRepo, commits);
     }
 
-    // 5. File & Directory Drop / Selection Handlers
+    // 5. Refresh Logic via FileSystemDirectoryHandle
+    async function refreshRepoByHandle(repoName, isSilent = false) {
+      let handle = repoHandlesMap.get(repoName);
+      if (!handle) {
+        handle = await getHandleFromDB(repoName);
+        if (handle) repoHandlesMap.set(repoName, handle);
+      }
+
+      if (!handle) {
+        if (!isSilent) {
+          showToast(`💡 项目「${getRepoDisplayName(repoName)}」未建立直接句柄绑定，可点击上传框重新选取一次以激活一键刷新`, 'info');
+        }
+        return false;
+      }
+
+      try {
+        let perm = await handle.queryPermission({ mode: 'read' });
+        if (perm !== 'granted') {
+          if (isSilent) {
+            return false;
+          }
+          perm = await handle.requestPermission({ mode: 'read' });
+          if (perm !== 'granted') {
+            showToast(`⚠️ 未授予「${getRepoDisplayName(repoName)}」目录读取权限`, 'warning');
+            return false;
+          }
+        }
+
+        if (!isSilent) isRefreshing.value = true;
+        const result = await window.GitParser.parseFromDirectoryHandle(handle);
+        if (result && result.commits && result.commits.length > 0) {
+          const oldCommits = allRepoMap.get(repoName) || [];
+          const oldTopHash = oldCommits.length > 0 ? oldCommits[0].hash : '';
+          const newTopHash = result.commits.length > 0 ? result.commits[0].hash : '';
+          const oldCount = oldCommits.length;
+          const newCount = result.commits.length;
+
+          importCommits(result.commits, repoName);
+
+          if (oldTopHash !== newTopHash || oldCount !== newCount) {
+            showToast(`🔄 已重新读取并同步「${getRepoDisplayName(repoName)}」最新提交日志`);
+          } else if (!isSilent) {
+            showToast(`✅ 已拉取最新 Git 日志，「${getRepoDisplayName(repoName)}」已是最新状态`);
+          }
+          return true;
+        }
+      } catch (err) {
+        console.warn(`[Refresh] 刷新项目「${repoName}」失败:`, err);
+        if (!isSilent) {
+          showToast(`⚠️ 刷新「${getRepoDisplayName(repoName)}」失败: ${err.message || '读取异常'}`);
+        }
+      } finally {
+        if (!isSilent) isRefreshing.value = false;
+      }
+      return false;
+    }
+
+    async function refreshSelectedRepos(isSilent = false) {
+      if (selectedRepoNames.value.length === 0) {
+        if (!isSilent) showToast('💡 请先在列表中勾选要刷新的项目');
+        return;
+      }
+      if (!isSilent) isRefreshing.value = true;
+      let refreshedCount = 0;
+      try {
+        for (const name of selectedRepoNames.value) {
+          const success = await refreshRepoByHandle(name, isSilent);
+          if (success) refreshedCount++;
+        }
+        if (!isSilent && refreshedCount === 0) {
+          showToast('💡 提示：点击项目卡片选取目录后即可永久享受一键极速刷新', 'info');
+        }
+      } finally {
+        isRefreshing.value = false;
+      }
+    }
+
+    // 6. Window Focus Auto-Sync Listener (切回窗口静默自动感知)
+    let lastFocusCheckTime = 0;
+    function setupWindowFocusAutoRefresh() {
+      window.addEventListener('focus', async () => {
+        const now = Date.now();
+        if (now - lastFocusCheckTime < 3000) return;
+        lastFocusCheckTime = now;
+
+        if (selectedRepoNames.value.length > 0) {
+          console.log('👀 [Auto-Sync] 窗口获得焦点，正在静默检查 Git 仓库更新…');
+          for (const name of selectedRepoNames.value) {
+            await refreshRepoByHandle(name, true);
+          }
+        }
+      });
+    }
+
+    // 7. File & Directory Drop / Selection Handlers
     async function handleFolderSelect() {
-      console.group('📁 [GitDailyReport] 尝试通过原生目录选择器选取项目...');
+      console.group('📁 [GitDailyReport] 尝试通过原生目录选择器选取项目…');
       if ('showDirectoryPicker' in window) {
         try {
-          console.log('🔍 正在唤起 window.showDirectoryPicker()...');
+          console.log('🔍 正在唤起 window.showDirectoryPicker()…');
           const dirHandle = await window.showDirectoryPicker();
           console.log('✅ 用户已选取目录 handle:', dirHandle.name);
-          showLoading('⏳ 正在读取并解析 .git/logs 文件...');
+          showLoading('⏳ 正在读取并解析 .git/logs 文件…');
           await new Promise(r => setTimeout(r, 60));
 
           const result = await window.GitParser.parseFromDirectoryHandle(dirHandle);
@@ -196,12 +354,14 @@
           hideLoading();
 
           if (result.commits && result.commits.length > 0) {
+            await saveHandleToDB(result.repoName, dirHandle);
+            repoHandlesMap.set(result.repoName, dirHandle);
             importCommits(result.commits, result.repoName);
-            showToast(`✅ 成功导入「${getRepoDisplayName(result.repoName)}」 ${result.commits.length} 条记录`);
+            showToast(`✅ 成功导入「${getRepoDisplayName(result.repoName)}」 ${result.commits.length} 条记录 (已开启自动同步)`);
             console.groupEnd();
             return true;
           } else {
-            console.warn('⚠️ 目录中未解析出有效提交记录，可能未找到 .git/logs/HEAD。降级尝试其他方式...');
+            console.warn('⚠️ 目录中未解析出有效提交记录，可能未找到 .git/logs/HEAD。降级尝试其他方式…');
           }
         } catch (err) {
           hideLoading();
@@ -266,7 +426,7 @@
 
     async function handleDropFiles(dataTransfer) {
       console.group('🚀 [GitDailyReport] 接收到拖拽事件 (Drop Event)');
-      showLoading('⏳ 正在递归解析 Git 仓库文件夹与提交记录...');
+      showLoading('⏳ 正在递归解析 Git 仓库文件夹与提交记录…');
       await new Promise(r => setTimeout(r, 60));
 
       try {
@@ -397,7 +557,7 @@
         return;
       }
 
-      showLoading('⏳ 正在提取项目日志并构建提交序列...');
+      showLoading('⏳ 正在提取项目日志并构建提交序列…');
       await new Promise(r => setTimeout(r, 60));
 
       try {
@@ -479,6 +639,7 @@
       recentRepos,
       selectedRepoNames,
       repoAliases,
+      isRefreshing,
       mergedCommits,
       isMultiRepoMode,
       currentRepoBadgeText,
@@ -488,6 +649,8 @@
       toggleSelectAllRepos,
       initRepoState,
       importCommits,
+      refreshRepoByHandle,
+      refreshSelectedRepos,
       handleFolderSelect,
       handleDropFiles,
       handleFileInputChange

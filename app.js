@@ -11,9 +11,9 @@
     setup() {
       // 1. Loading State
       const isLoading = ref(false);
-      const loadingMessage = ref('正在解析 Git 提交记录...');
+      const loadingMessage = ref('正在解析 Git 提交记录…');
 
-      function showLoading(msg = '正在解析 Git 提交记录...') {
+      function showLoading(msg = '正在解析 Git 提交记录…') {
         loadingMessage.value = msg;
         isLoading.value = true;
       }
@@ -237,10 +237,13 @@
         selectedRepoNames: repos.selectedRepoNames,
         currentRepoBadgeText: repos.currentRepoBadgeText,
         isMultiRepoMode: repos.isMultiRepoMode,
+        mergedCommits: repos.mergedCommits,
+        isRefreshing: repos.isRefreshing,
         getRepoDisplayName: repos.getRepoDisplayName,
         promptEditAlias: repos.promptEditAlias,
         toggleRepoSelection: repos.toggleRepoSelection,
         toggleSelectAllRepos: repos.toggleSelectAllRepos,
+        refreshSelectedRepos: repos.refreshSelectedRepos,
         isDragOver,
         fileInputRef,
         onDropZoneClick,
