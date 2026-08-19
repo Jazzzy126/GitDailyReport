@@ -54,6 +54,7 @@
 
       return () => h('span', {
         class: 'inline-flex items-center justify-center shrink-0 leading-none',
+        'aria-hidden': 'true',
         innerHTML: svgHtml.value
       });
     }

@@ -35,7 +35,6 @@
   <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.fog.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@formkit/auto-animate@1/index.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
 
   <link rel="stylesheet" href="styles.css">
@@ -44,9 +43,16 @@
 <body
   class="min-h-full antialiased flex flex-col select-none transition-colors duration-300 relative overflow-x-hidden">
 
+  <!-- Skip link for keyboard/screen-reader navigation -->
+  <a href="#main-content"
+    class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#007AFF] focus:text-white focus:font-bold focus:rounded-xl focus:shadow-2xl focus:outline-none">
+    跳至主要内容
+  </a>
+
   <!-- Dynamic Ambient Vanta Liquid Fog Canvas Layer -->
   <div id="vanta-bg"
-    class="fixed inset-0 pointer-events-none -z-10 opacity-70 dark:opacity-40 transition-opacity duration-700"></div>
+    class="fixed inset-0 pointer-events-none -z-10 opacity-70 dark:opacity-40 transition-opacity duration-700"
+    aria-hidden="true"></div>
 
   <div id="app" class="min-h-full flex flex-col flex-1 relative z-10" v-cloak>
 
@@ -58,14 +64,15 @@
         <!-- Header Left: Logo & Brand Title -->
         <div class="flex items-center gap-3 shrink-0">
           <div
-            class="w-8 h-8 rounded-xl bg-linear-to-tr from-slate-900 via-slate-800 to-slate-700 dark:from-slate-100 dark:to-white text-white dark:text-black flex items-center justify-center font-mono font-bold text-sm shadow-md shrink-0 hover:rotate-6 hover:scale-105 transition duration-300">
+            class="w-8 h-8 rounded-xl bg-linear-to-tr from-slate-900 via-slate-800 to-slate-700 dark:from-slate-100 dark:to-white text-white dark:text-black flex items-center justify-center font-mono font-bold text-sm shadow-md shrink-0 hover:rotate-6 hover:scale-105 transition duration-300"
+            aria-hidden="true">
             
           </div>
           <div class="flex items-center gap-2.5">
             <span class="font-extrabold text-sm sm:text-base tracking-tight truncate">Git 日报生成器</span>
             <span
               class="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-bold bg-[#007AFF]/10 text-[#007AFF] dark:text-[#38bdf8] border border-[#007AFF]/20 rounded-full">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#007AFF] animate-pulse"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-[#007AFF] animate-pulse" aria-hidden="true"></span>
               Studio Pro v2.0 (Componentized)
             </span>
           </div>
@@ -74,15 +81,17 @@
         <!-- Header Right: Theme Toggle & Settings Button -->
         <div class="flex items-center gap-2 shrink-0">
           <button type="button" @click="toggleTheme"
-            class="ios-btn w-9 h-9 p-0 ios-input-box rounded-xl flex items-center justify-center transition hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
-            :title="themeTitle">
+            class="ios-btn w-9 h-9 p-0 ios-input-box rounded-xl flex items-center justify-center transition hover:scale-105 active:scale-95 cursor-pointer shadow-xs focus-visible:ring-2 focus-visible:ring-[#007AFF]"
+            :title="themeTitle"
+            :aria-label="themeTitle">
             <studio-icon :name="themeIcon" :class="['w-4 h-4', themeColorClass]"></studio-icon>
           </button>
 
           <button type="button" @click="openSettingsModal('prompt')"
-            class="ios-btn w-9 h-9 p-0 ios-input-box rounded-xl flex items-center justify-center transition hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
-            title="系统设置">
-            <i data-lucide="settings" class="w-4 h-4 opacity-80"></i>
+            class="ios-btn w-9 h-9 p-0 ios-input-box rounded-xl flex items-center justify-center transition hover:scale-105 active:scale-95 cursor-pointer shadow-xs focus-visible:ring-2 focus-visible:ring-[#007AFF]"
+            title="系统设置"
+            aria-label="系统设置">
+            <i data-lucide="settings" class="w-4 h-4 opacity-80" aria-hidden="true"></i>
           </button>
         </div>
 
@@ -90,7 +99,7 @@
     </header>
 
     <!-- Studio Workspace Grid: Strict 4-Point Grid Spacing -->
-    <main class="flex-1 w-full max-w-[1536px] mx-auto grid grid-cols-12 gap-3 p-3 lg:overflow-hidden lg:min-h-0">
+    <main id="main-content" class="flex-1 w-full max-w-[1536px] mx-auto grid grid-cols-12 gap-3 p-3 lg:overflow-hidden lg:min-h-0">
 
       <!-- Left Split Pane: Git Repository & Commits Stream -->
       <section class="col-span-12 lg:col-span-4 xl:col-span-4 flex flex-col gap-3 h-auto lg:h-full lg:min-h-0">
@@ -98,45 +107,74 @@
         <!-- Card 1: 📁 项目仓库管理卡片 -->
         <studio-pane title="项目仓库" icon="folder-git-2" custom-class="shrink-0">
           <template #header-right>
-            <div class="studio-badge-pill truncate max-w-44">
-              <i data-lucide="git-branch" class="w-3 h-3 shrink-0"></i>
-              <span class="truncate">{{ currentRepoBadgeText }}</span>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" 
+                @click.stop="refreshSelectedRepos(false)"
+                :disabled="isRefreshing || selectedRepoNames.length === 0"
+                class="studio-badge-pill hover:scale-105 active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#007AFF] transition disabled:opacity-50"
+                title="一键刷新读取本地最新提交 (支持切回窗口自动同步)"
+                aria-label="一键刷新读取本地最新提交">
+                <studio-icon name="rotate-cw" :class="['w-3 h-3 text-[#007AFF] dark:text-[#38bdf8]', { 'animate-spin': isRefreshing }]"></studio-icon>
+                <span class="font-bold">{{ isRefreshing ? '同步中…' : '刷新' }}</span>
+              </button>
+
+              <div class="studio-badge-pill truncate max-w-36">
+                <i data-lucide="git-branch" class="w-3 h-3 shrink-0" aria-hidden="true"></i>
+                <span class="truncate">{{ currentRepoBadgeText }}</span>
+              </div>
             </div>
           </template>
 
           <div class="p-4 space-y-3">
-            <!-- Direct Folder Drop Zone -->
-            <div @click="onDropZoneClick" @dragover="onDragOver" @dragleave="onDragLeave" @drop="onDrop"
-              :class="['drop-zone-box ios-press-action rounded-2xl p-4 text-center cursor-pointer transition-all duration-200 group hover:shadow-md', { 'border-[#007AFF] bg-slate-200/50 dark:bg-slate-800/50 scale-[0.99]': isDragOver }]">
+            <!-- Direct Folder Drop Zone (Keyboard Accessible) -->
+            <div @click="onDropZoneClick" 
+              @keydown.enter.prevent="onDropZoneClick"
+              @keydown.space.prevent="onDropZoneClick"
+              @dragover="onDragOver" 
+              @dragleave="onDragLeave" 
+              @drop="onDrop"
+              role="button"
+              tabindex="0"
+              aria-label="点击或拖拽上传 Git 项目文件夹"
+              :class="['drop-zone-box ios-press-action rounded-2xl p-4 text-center cursor-pointer transition-all duration-200 group hover:shadow-md focus-visible:ring-2 focus-visible:ring-[#007AFF]', { 'border-[#007AFF] bg-slate-200/50 dark:bg-slate-800/50 scale-[0.99]': isDragOver }]">
               <div
                 class="flex items-center justify-center gap-2.5 text-xs font-extrabold group-hover:text-[#007AFF] transition">
                 <div
                   class="w-7 h-7 rounded-xl bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center group-hover:scale-110 transition">
-                  <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+                  <i data-lucide="upload-cloud" class="w-4 h-4" aria-hidden="true"></i>
                 </div>
                 <span>点击或拖拽 Git 项目文件夹</span>
               </div>
               <div class="text-xs opacity-50 mt-1 font-medium">支持多项目合并与别名设置</div>
             </div>
 
-            <input type="file" ref="fileInputRef" @change="onFileInputChange" webkitdirectory directory class="hidden">
+            <input type="file" ref="fileInputRef" @change="onFileInputChange" webkitdirectory directory class="hidden" aria-hidden="true" tabindex="-1">
 
             <!-- Quick Recent Repos Multi-Select Pill Bar -->
             <div v-if="recentRepos.length > 0"
               class="mt-2 pt-2.5 border-t border-black/5 dark:border-white/10 shrink-0">
               <div class="flex items-center justify-between text-xs mb-2">
                 <span class="font-extrabold opacity-70 flex items-center gap-1.5">
-                  <i data-lucide="layers" class="w-3.5 h-3.5 text-[#007AFF]"></i>
+                  <i data-lucide="layers" class="w-3.5 h-3.5 text-[#007AFF]" aria-hidden="true"></i>
                   <span>最近项目 (可多选合并日报)</span>
                 </span>
                 <button type="button" @click="toggleSelectAllRepos"
-                  class="text-[11px] font-extrabold text-[#007AFF] hover:underline cursor-pointer">
+                  class="text-[11px] font-extrabold text-[#007AFF] hover:underline cursor-pointer focus-visible:ring-2 focus-visible:ring-[#007AFF] rounded px-1"
+                  :aria-label="selectedRepoNames.length === recentRepos.length ? '清空所有已选项目' : '全选所有最近项目'">
                   {{ selectedRepoNames.length === recentRepos.length ? '清空选择' : '全选项目' }}
                 </button>
               </div>
               <div id="recent-pills-container" class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1">
-                <div v-for="r in recentRepos" :key="r.repoName" @click="toggleRepoSelection(r.repoName)" :class="[
-                    'px-2.5 py-1 text-xs font-bold rounded-md transition-all shrink-0 border flex items-center gap-1.5 cursor-pointer hover:scale-102 active:scale-98',
+                <div v-for="r in recentRepos" :key="r.repoName" 
+                  @click="toggleRepoSelection(r.repoName)" 
+                  @keydown.enter.prevent="toggleRepoSelection(r.repoName)"
+                  @keydown.space.prevent="toggleRepoSelection(r.repoName)"
+                  role="button"
+                  tabindex="0"
+                  :aria-pressed="selectedRepoNames.includes(r.repoName)"
+                  :aria-label="'切换选择项目: ' + getRepoDisplayName(r.repoName)"
+                  :class="[
+                    'px-2.5 py-1 text-xs font-bold rounded-md transition-all shrink-0 border flex items-center gap-1.5 cursor-pointer hover:scale-102 active:scale-98 focus-visible:ring-2 focus-visible:ring-[#007AFF]',
                     selectedRepoNames.includes(r.repoName)
                       ? 'bg-[#007AFF] text-white border-[#007AFF] shadow-xs'
                       : 'ios-input-box opacity-75 hover:opacity-100 border-black/5 dark:border-white/10'
@@ -150,8 +188,9 @@
                   </span>
 
                   <button type="button" @click.stop="promptEditAlias(r.repoName)"
-                    class="p-0.5 opacity-60 hover:opacity-100 hover:bg-white/20 rounded transition shrink-0 cursor-pointer"
-                    title="修改此项目别名">
+                    class="p-0.5 opacity-60 hover:opacity-100 hover:bg-white/20 rounded transition shrink-0 cursor-pointer focus-visible:ring-1 focus-visible:ring-white"
+                    :title="'修改项目别名: ' + r.repoName"
+                    :aria-label="'修改项目别名: ' + r.repoName">
                     <studio-icon name="edit-3" class="w-3 h-3"></studio-icon>
                   </button>
                 </div>
@@ -163,9 +202,9 @@
         <!-- Card 2: ⚙️ 提交记录列表卡片 -->
         <studio-pane title="提交记录" icon="git-commit" custom-class="h-auto lg:flex-1 lg:min-h-0">
           <template #header-right>
-            <div class="studio-badge-pill">
-              <i data-lucide="bar-chart-2" class="w-3 h-3 shrink-0"></i>
-              <span>{{ filteredCommits.length }} 条提交</span>
+            <div class="studio-badge-pill tabular-nums">
+              <i data-lucide="bar-chart-2" class="w-3 h-3 shrink-0" aria-hidden="true"></i>
+              <span class="tabular-nums font-mono">{{ filteredCommits.length }} 条提交</span>
             </div>
           </template>
 
@@ -174,7 +213,12 @@
             <div class="mb-3 shrink-0">
               <div class="grid grid-cols-2 gap-2 items-center">
                 <div class="relative w-full">
-                  <input type="date" v-model="filterDate" class="ios-form-control cursor-pointer">
+                  <input type="date" 
+                    id="filter-date-input"
+                    name="filterDate"
+                    v-model="filterDate" 
+                    aria-label="筛选提交日期"
+                    class="ios-form-control cursor-pointer">
                 </div>
 
                 <div class="w-full">
@@ -187,13 +231,19 @@
             <div id="commit-list-container"
               class="max-h-96 lg:max-h-none flex-1 min-h-0 overflow-y-auto space-y-2 pr-1.5 custom-scrollbar">
               <div v-if="filteredCommits.length === 0" class="text-center opacity-50 text-xs py-12 space-y-2">
-                <i data-lucide="folder-open" class="w-6 h-6 mx-auto opacity-60 mb-2"></i>
+                <i data-lucide="folder-open" class="w-6 h-6 mx-auto opacity-60 mb-2" aria-hidden="true"></i>
                 <div class="font-bold">无对应提交记录</div>
                 <div class="text-xs">请选择或拖拽本地 Git 项目，或调整日期/作者筛选</div>
               </div>
 
-              <div v-else v-for="c in filteredCommits" :key="c.id || c.hash" @click="openCommitDetail(c)"
-                class="commit-item ios-press-action p-3 text-xs transition-all flex items-center justify-between gap-3 cursor-pointer group rounded-xl hover:bg-black/5 dark:hover:bg-white/5 hover:translate-x-1">
+              <div v-else v-for="c in filteredCommits" :key="c.id || c.hash" 
+                @click="openCommitDetail(c)"
+                @keydown.enter="openCommitDetail(c)"
+                @keydown.space.prevent="openCommitDetail(c)"
+                role="button"
+                tabindex="0"
+                :aria-label="'提交记录: ' + (c.hash || '') + ' ' + (c.message || '')"
+                class="commit-item ios-press-action p-3 text-xs transition-all flex items-center justify-between gap-3 cursor-pointer group rounded-xl hover:bg-black/5 dark:hover:bg-white/5 hover:translate-x-1 focus-visible:ring-2 focus-visible:ring-[#007AFF]">
                 <div class="commit-card-body flex-1 min-w-0">
                   <div class="flex items-center gap-2 mb-1">
                     <span v-if="isMultiRepoMode && c.repoName"
@@ -201,16 +251,17 @@
                       :title="c.repoName">
                       {{ getRepoDisplayName(c.repoName) }}
                     </span>
-                    <span class="font-mono text-xs opacity-60 font-semibold">#{{ c.hash }}</span>
+                    <span class="font-mono text-xs opacity-60 font-semibold tabular-nums">#{{ c.hash }}</span>
                     <span class="text-xs opacity-50 font-medium truncate">{{ c.author }}</span>
-                    <span class="text-xs opacity-50 ml-auto font-medium">{{ c.date }}</span>
+                    <span class="text-xs opacity-50 ml-auto font-medium tabular-nums">{{ c.date }}</span>
                   </div>
                   <div class="text-xs truncate font-semibold" :title="c.message">{{ c.message }}</div>
                 </div>
                 <button type="button" @click.stop="openCommitDetail(c)"
-                  class="btn-view-detail p-2 text-slate-400 hover:text-[#007AFF] dark:hover:text-[#38bdf8] hover:bg-[#007AFF]/10 rounded-lg transition shrink-0 self-stretch flex items-center justify-center border border-transparent cursor-pointer"
-                  title="查看 Commit 提交元数据明细">
-                  <i data-lucide="eye" class="w-4 h-4"></i>
+                  class="btn-view-detail p-2 text-slate-400 hover:text-[#007AFF] dark:hover:text-[#38bdf8] hover:bg-[#007AFF]/10 rounded-lg transition shrink-0 self-stretch flex items-center justify-center border border-transparent cursor-pointer focus-visible:ring-2 focus-visible:ring-[#007AFF]"
+                  title="查看 Commit 提交元数据明细"
+                  :aria-label="'查看提交 ' + c.hash + ' 详情'">
+                  <i data-lucide="eye" class="w-4 h-4" aria-hidden="true"></i>
                 </button>
               </div>
             </div>
@@ -224,9 +275,9 @@
         class="col-span-12 lg:col-span-8 xl:col-span-8 flex flex-col h-auto min-h-[460px] lg:h-full lg:min-h-0 overflow-hidden">
         <studio-pane title="工作日报输出" icon="file-text" custom-class="h-full">
           <template #header-right>
-            <div class="studio-badge-pill opacity-75">
-              <i data-lucide="type" class="w-3 h-3 shrink-0"></i>
-              <span class="font-mono font-bold">{{ animatedWordCount }} 字</span>
+            <div class="studio-badge-pill opacity-75 tabular-nums">
+              <i data-lucide="type" class="w-3 h-3 shrink-0" aria-hidden="true"></i>
+              <span class="font-mono font-bold tabular-nums">{{ animatedWordCount }} 字</span>
             </div>
           </template>
 
@@ -236,22 +287,25 @@
               class="p-2.5 ios-input-box rounded-2xl mb-3 shrink-0 flex flex-wrap items-center justify-between gap-2 border border-black/5 dark:border-white/10 shadow-xs">
               <div class="flex items-center gap-2">
                 <button type="button" @click="generateReport" :disabled="isTyping"
-                  class="studio-btn studio-btn-primary cursor-pointer hover:scale-105 active:scale-95 transition shadow-xs disabled:opacity-75">
-                  <i data-lucide="wand-2" class="w-4 h-4 text-[#FF9500] animate-bounce"></i>
-                  <span>{{ isTyping ? '正在流式撰写中...' : '生成日报' }}</span>
+                  class="studio-btn studio-btn-primary cursor-pointer hover:scale-105 active:scale-95 transition shadow-xs disabled:opacity-75 focus-visible:ring-2 focus-visible:ring-[#007AFF]"
+                  aria-label="生成日报">
+                  <i data-lucide="wand-2" class="w-4 h-4 text-[#FF9500] animate-bounce" aria-hidden="true"></i>
+                  <span>{{ isTyping ? '正在流式撰写中…' : '生成日报' }}</span>
                 </button>
               </div>
 
               <div class="flex items-center gap-2 flex-wrap">
                 <button type="button" @click="copyPlain"
-                  class="studio-btn studio-btn-primary cursor-pointer hover:scale-105 active:scale-95 transition shadow-xs">
-                  <i data-lucide="copy" class="w-4 h-4"></i>
+                  class="studio-btn studio-btn-primary cursor-pointer hover:scale-105 active:scale-95 transition shadow-xs focus-visible:ring-2 focus-visible:ring-[#007AFF]"
+                  aria-label="复制纯文本日报">
+                  <i data-lucide="copy" class="w-4 h-4" aria-hidden="true"></i>
                   <span>复制纯文本</span>
                 </button>
 
                 <button type="button" @click="copyMd"
-                  class="studio-btn studio-btn-secondary cursor-pointer hover:scale-105 active:scale-95 transition">
-                  <i data-lucide="file-code" class="w-4 h-4 opacity-70"></i>
+                  class="studio-btn studio-btn-secondary cursor-pointer hover:scale-105 active:scale-95 transition focus-visible:ring-2 focus-visible:ring-[#007AFF]"
+                  aria-label="复制 Markdown 格式日报">
+                  <i data-lucide="file-code" class="w-4 h-4 opacity-70" aria-hidden="true"></i>
                   <span>复制 MD</span>
                 </button>
               </div>
@@ -259,9 +313,13 @@
 
             <!-- Editor Textarea Area -->
             <div class="flex-1 min-h-72 lg:min-h-0 relative flex flex-col overflow-hidden">
-              <textarea v-model="reportOutput"
-                class="studio-editor-textarea w-full flex-1 h-full p-4 text-[13px] sm:text-sm leading-6 ios-input-box rounded-2xl outline-none resize-none custom-scrollbar font-medium focus:border-[#007AFF] transition"
-                placeholder="生成的日报将在此处呈现，您可以随意在此处实时修改补充..."></textarea>
+              <textarea 
+                id="report-output-textarea"
+                name="reportOutput"
+                v-model="reportOutput"
+                aria-label="工作日报输出与编辑区"
+                class="studio-editor-textarea w-full flex-1 h-full p-4 text-[13px] sm:text-sm leading-6 ios-input-box rounded-2xl resize-none custom-scrollbar font-medium focus:border-[#007AFF] focus-visible:ring-2 focus-visible:ring-[#007AFF] transition"
+                placeholder="生成的日报将在此处呈现，您可以随意在此处实时修改补充…"></textarea>
             </div>
           </div>
         </studio-pane>

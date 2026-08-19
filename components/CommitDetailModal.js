@@ -52,21 +52,26 @@
       <div
         v-if="isOpen"
         @click.self="close"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="commit-modal-title"
         class="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all duration-300">
         <div class="commit-modal-box studio-modal-box w-full max-w-xl p-6 space-y-4 rounded-3xl studio-pane shadow-2xl relative max-h-[92vh] overflow-y-auto custom-scrollbar border border-white/20">
           <button
+            type="button"
             @click="close"
-            class="absolute right-4 top-4 w-8 h-8 rounded-full ios-input-box flex items-center justify-center text-slate-400 hover:text-slate-600 font-bold text-sm cursor-pointer hover:rotate-90 transition duration-200">
+            aria-label="关闭提交详情"
+            class="absolute right-4 top-4 w-8 h-8 rounded-full ios-input-box flex items-center justify-center text-slate-400 hover:text-slate-600 font-bold text-sm cursor-pointer hover:rotate-90 transition duration-200 focus-visible:ring-2 focus-visible:ring-[#007AFF]">
             ✕
           </button>
 
           <!-- Modal Header -->
           <div class="flex items-center gap-3 border-b border-black/5 dark:border-white/10 pb-3">
             <div class="w-10 h-10 rounded-2xl bg-[#007AFF]/10 text-[#007AFF] flex items-center justify-center shrink-0">
-              <i data-lucide="git-commit" class="w-5 h-5"></i>
+              <i data-lucide="git-commit" class="w-5 h-5" aria-hidden="true"></i>
             </div>
             <div>
-              <h3 class="font-extrabold text-base">Git 提交元数据明细</h3>
+              <h2 id="commit-modal-title" class="font-extrabold text-base">Git 提交元数据明细</h2>
               <span class="text-xs opacity-50 font-medium">iOS Inset Grouped Commit Inspector</span>
             </div>
           </div>
@@ -76,13 +81,15 @@
             <div class="flex items-center justify-between border-b border-black/5 dark:border-white/5 pb-2">
               <span class="text-xs opacity-50 font-bold uppercase tracking-wider">Commit 40位 Checksum</span>
               <button
+                type="button"
                 @click="$emit('copy-sha')"
-                class="text-xs text-[#007AFF] hover:underline font-bold flex items-center gap-1 cursor-pointer">
-                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                aria-label="复制 Commit Hash 校验码"
+                class="text-xs text-[#007AFF] hover:underline font-bold flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#007AFF] rounded px-1">
+                <i data-lucide="copy" class="w-3.5 h-3.5" aria-hidden="true"></i>
                 <span>复制 Hash</span>
               </button>
             </div>
-            <div class="font-mono text-xs font-bold text-[#007AFF] dark:text-[#38bdf8] break-all select-all">
+            <div class="font-mono text-xs font-bold text-[#007AFF] dark:text-[#38bdf8] break-all select-all tabular-nums">
               {{ commit?.fullHash || commit?.hash || '--' }}
             </div>
           </div>
@@ -99,7 +106,7 @@
 
             <div class="flex items-center justify-between pt-3">
               <span class="opacity-60 font-medium">提交精确时间 (Date & Timezone)</span>
-              <span class="font-bold font-mono">
+              <span class="font-bold font-mono tabular-nums">
                 {{ commit?.date }} {{ commit?.time }}
                 {{ commit?.timezone ? '(' + commit.timezone + ')' : '' }}
               </span>
@@ -121,31 +128,33 @@
 
             <div class="flex items-center justify-between pt-3">
               <span class="opacity-60 font-medium">Unix 时间戳 (Timestamp)</span>
-              <span class="font-mono font-bold opacity-80">
+              <span class="font-mono font-bold opacity-80 tabular-nums">
                 {{ commit?.timestamp ? commit.timestamp + ' (Sec)' : '--' }}
               </span>
             </div>
 
             <div class="flex items-center justify-between pt-3">
               <span class="opacity-60 font-medium">父级 Commit (Parent SHA)</span>
-              <span class="font-mono font-bold truncate max-w-56 opacity-80" :title="commit?.prevHash">
+              <span class="font-mono font-bold truncate max-w-56 opacity-80 tabular-nums" :title="commit?.prevHash">
                 {{ commit?.prevHash || '--' }}
               </span>
             </div>
           </div>
 
           <!-- Section 3: Full Message Section -->
-          <div class="p-4 ios-input-box rounded-2xl space-y-2">
+          <div class="p-4 ios-input-box rounded-2xl space-y-2 min-w-0">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold opacity-70">完整 Commit 日志 Message</span>
               <button
+                type="button"
                 @click="$emit('copy-msg')"
-                class="text-xs text-[#007AFF] hover:underline font-bold flex items-center gap-1 cursor-pointer">
-                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                aria-label="复制完整 Commit 日志"
+                class="text-xs text-[#007AFF] hover:underline font-bold flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#007AFF] rounded px-1">
+                <i data-lucide="copy" class="w-3.5 h-3.5" aria-hidden="true"></i>
                 <span>复制日志</span>
               </button>
             </div>
-            <div class="studio-editor-textarea p-3.5 ios-input-box rounded-xl text-xs leading-5 font-mono whitespace-pre-wrap wrap-break-word max-h-40 overflow-y-auto custom-scrollbar select-text bg-white/50 dark:bg-slate-900/60">
+            <div class="studio-editor-textarea p-3.5 ios-input-box rounded-xl text-xs leading-5 font-mono whitespace-pre-wrap break-words max-h-40 overflow-y-auto custom-scrollbar select-text bg-white/50 dark:bg-slate-900/60">
               {{ commit?.fullMessage || commit?.message || '--' }}
             </div>
           </div>
@@ -153,11 +162,11 @@
           <!-- Section 4: Raw Log Line Expandable Box -->
           <div class="border-t border-black/5 dark:border-white/10 pt-2">
             <details class="group">
-              <summary class="text-xs font-bold opacity-50 cursor-pointer hover:opacity-100 flex items-center justify-between select-none">
+              <summary class="text-xs font-bold opacity-50 cursor-pointer hover:opacity-100 flex items-center justify-between select-none focus-visible:ring-2 focus-visible:ring-[#007AFF] rounded p-1">
                 <span>查看 100% 原始 Git 日报底层数据 (Raw Log Line)</span>
-                <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition group-open:rotate-180"></i>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition group-open:rotate-180" aria-hidden="true"></i>
               </summary>
-              <div class="mt-2 p-3 ios-input-box rounded-xl font-mono text-xs opacity-70 break-all select-all bg-slate-100 dark:bg-slate-950">
+              <div class="mt-2 p-3 ios-input-box rounded-xl font-mono text-xs opacity-70 break-all select-all bg-slate-100 dark:bg-slate-950 tabular-nums">
                 {{ commit?.rawLine || ('commit ' + (commit?.fullHash || commit?.hash || '')) }}
               </div>
             </details>
@@ -166,8 +175,10 @@
           <!-- Modal Footer -->
           <div class="flex items-center justify-end pt-2 border-t border-black/5 dark:border-white/10">
             <button
+              type="button"
               @click="close"
-              class="ios-btn px-6 py-2 bg-[#007AFF] text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer hover:scale-105 active:scale-95 transition">
+              aria-label="关闭对话框"
+              class="ios-btn px-6 py-2 bg-[#007AFF] text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer hover:scale-105 active:scale-95 transition focus-visible:ring-2 focus-visible:ring-[#007AFF]">
               确定
             </button>
           </div>

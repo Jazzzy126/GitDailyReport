@@ -56,19 +56,31 @@
       <div :class="['custom-select-container w-full', { open: isOpen }]" @click.stop>
         <button 
           @click="toggle" 
-          class="custom-select-trigger" 
-          type="button">
+          @keydown.down.prevent="isOpen = true"
+          @keydown.up.prevent="isOpen = true"
+          @keydown.esc="close"
+          class="custom-select-trigger focus-visible:ring-2 focus-visible:ring-[#007AFF]" 
+          type="button"
+          role="combobox"
+          :aria-expanded="isOpen"
+          aria-haspopup="listbox"
+          :aria-label="placeholder || '请选择选项'">
           <span class="custom-select-label truncate font-semibold">{{ currentLabel }}</span>
-          <i data-lucide="chevron-down" :class="['custom-select-chevron transition-transform duration-200', { 'rotate-180': isOpen }]"></i>
+          <i data-lucide="chevron-down" :class="['custom-select-chevron transition-transform duration-200', { 'rotate-180': isOpen }]" aria-hidden="true"></i>
         </button>
-        <div v-show="isOpen" class="custom-select-dropdown w-full animate-fadeIn">
+        <div v-show="isOpen" class="custom-select-dropdown w-full animate-fadeIn" role="listbox">
           <div 
             v-for="opt in options" 
             :key="opt.value"
             @click="selectOption(opt.value)"
-            :class="['custom-select-option transition-colors duration-150', { selected: modelValue === opt.value }]">
+            @keydown.enter.prevent="selectOption(opt.value)"
+            @keydown.space.prevent="selectOption(opt.value)"
+            role="option"
+            :aria-selected="modelValue === opt.value"
+            tabindex="0"
+            :class="['custom-select-option transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[#007AFF] outline-none', { selected: modelValue === opt.value }]">
             <span>{{ opt.label }}</span>
-            <i data-lucide="check" class="check-icon"></i>
+            <i data-lucide="check" class="check-icon" aria-hidden="true"></i>
           </div>
         </div>
       </div>

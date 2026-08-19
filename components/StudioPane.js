@@ -16,7 +16,7 @@
         <!-- Edge-to-Edge Header Bar -->
         <div class="studio-card-header">
           <div class="studio-pane-title">
-            <i v-if="icon" :data-lucide="icon" class="studio-pane-title-icon"></i>
+            <i v-if="icon" :data-lucide="icon" class="studio-pane-title-icon" aria-hidden="true"></i>
             <span>{{ title }}</span>
           </div>
           <!-- Badge / Action Slot -->

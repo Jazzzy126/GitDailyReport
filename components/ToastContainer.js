@@ -10,7 +10,7 @@
       toasts: { type: Array, default: () => [] }
     },
     template: `
-      <div class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 pointer-events-none">
+      <div class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 pointer-events-none" role="status" aria-live="polite">
         <transition-group 
           enter-active-class="transition duration-300 ease-out"
           enter-from-class="transform translate-y-4 scale-95 opacity-0"
