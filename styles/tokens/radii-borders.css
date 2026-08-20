@@ -1,0 +1,34 @@
+/**
+ * Material 3 Shape & Radii System (Zero-Legacy Clean System)
+ * 1:1 Parity with Flutter ShapeBorder & BorderRadius Scale
+ */
+
+:root {
+  /* Material 3 Shape Scale */
+  --md-sys-shape-corner-none: 0px;
+  --md-sys-shape-corner-extra-small: 4px;
+  --md-sys-shape-corner-small: 6px;
+  --md-sys-shape-corner-medium: 10px;
+  --md-sys-shape-corner-large: 14px;
+  --md-sys-shape-corner-extra-large: 20px;
+  --md-sys-shape-corner-full: 9999px;
+
+  /* Glassmorphism Refraction Depth */
+  --md-sys-state-glass-blur: 28px;
+}
+
+/* Dynamic Material 3 Shape Overrides for Tailwind Utility Classes */
+.rounded-3xl { border-radius: var(--md-sys-shape-corner-extra-large) !important; }
+.rounded-2xl { border-radius: var(--md-sys-shape-corner-extra-large) !important; }
+.rounded-xl  { border-radius: var(--md-sys-shape-corner-large) !important; }
+.rounded-lg  { border-radius: var(--md-sys-shape-corner-large) !important; }
+.rounded-md  { border-radius: var(--md-sys-shape-corner-medium) !important; }
+.rounded-sm  { border-radius: var(--md-sys-shape-corner-small) !important; }
+.rounded     { border-radius: var(--md-sys-shape-corner-small) !important; }
+.rounded-full:not(.color-dot) { border-radius: var(--md-sys-shape-corner-full) !important; }
+
+.rounded-none   { border-radius: 0px !important; }
+.rounded-l-none { border-top-left-radius: 0px !important; border-bottom-left-radius: 0px !important; }
+.rounded-r-none { border-top-right-radius: 0px !important; border-bottom-right-radius: 0px !important; }
+.rounded-t-none { border-top-left-radius: 0px !important; border-top-right-radius: 0px !important; }
+.rounded-b-none { border-bottom-left-radius: 0px !important; border-bottom-right-radius: 0px !important; }

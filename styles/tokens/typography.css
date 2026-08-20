@@ -1,0 +1,18 @@
+/**
+ * Material 3 Typography Scale (Zero-Legacy Clean System)
+ * 1:1 Parity with Flutter ThemeData.textTheme
+ */
+
+:root {
+  /* Font Family Stacks */
+  --md-sys-typeface-brand: 'Plus Jakarta Sans', 'Geist', -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  --md-sys-typeface-plain: 'Geist', -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  --md-sys-typeface-code:  'Geist Mono', 'SF Mono', Monaco, Consolas, monospace;
+
+  /* Material 3 TypeScale Scale */
+  --md-sys-typescale-title-large:  1.125rem; /* 18px / 24px - Header 品牌名 */
+  --md-sys-typescale-title-medium: 0.875rem; /* 14px / 20px - 卡片 / 弹窗标题 */
+  --md-sys-typescale-body-medium:  0.8125rem;/* 13px / 22px - 日报编辑器 / Commit 日志主文本 */
+  --md-sys-typescale-label-large:  0.75rem;  /* 12px / 18px - 表单控件 / 按钮 */
+  --md-sys-typescale-label-small:  0.6875rem;/* 11px / 16px - 胶囊 Badge / 分类 Tag / 时间戳 */
+}

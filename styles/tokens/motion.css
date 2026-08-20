@@ -1,0 +1,51 @@
+/**
+ * Material 3 Motion Curves & Lighting Keyframes (Zero-Legacy Clean System)
+ * 1:1 Parity with Flutter Curves
+ */
+
+:root {
+  /* Easing Curves */
+  --md-sys-motion-easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);     /* Curves.elasticOut / Spring */
+  --md-sys-motion-easing-standard: cubic-bezier(0.16, 1, 0.3, 1);        /* Curves.easeOutCubic */
+  --md-sys-motion-easing-emphasized: cubic-bezier(0.4, 0, 0.2, 1);       /* Curves.easeInOutCubicEmphasized */
+
+  /* Durations */
+  --md-sys-motion-duration-short: 150ms;
+  --md-sys-motion-duration-medium: 250ms;
+  --md-sys-motion-duration-long: 350ms;
+}
+
+/* Keyframe Animations */
+@keyframes commitItemCascade {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes reportGeneratingGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 1px var(--md-sys-color-primary-glow), 0 0 20px -2px var(--md-sys-color-primary-glow);
+    border-color: var(--md-sys-color-primary);
+  }
+  50% {
+    box-shadow: 0 0 0 2px var(--md-sys-color-primary-glow), 0 0 32px 4px var(--md-sys-color-primary-glow);
+    border-color: var(--md-sys-color-primary-light);
+  }
+}
+
+/* Reduced Motion Accessible Fallback */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

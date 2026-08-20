@@ -1,0 +1,20 @@
+/**
+ * Design Tokens: Strict 4-Point / 8-Point Grid Rhythm System
+ * Standard Touch Targets & Inset Paddings
+ */
+
+:root {
+  /* Spacing Rhythm Scale */
+  --space-1: 0.25rem;  /* 4px  - Micro gap */
+  --space-2: 0.5rem;   /* 8px  - Compact gap */
+  --space-3: 0.75rem;  /* 12px - Medium gap / internal padding */
+  --space-4: 1.0rem;   /* 16px - Standard card padding */
+  --space-6: 1.5rem;   /* 24px - Modal padding / section gap */
+
+  /* Component Heights */
+  --height-header: 52px;
+  --height-card-header: 44px;
+  --height-control: 38px;
+  --height-btn-sm: 32px;
+  --height-icon-btn: 36px;
+}

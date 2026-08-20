@@ -1,0 +1,91 @@
+/**
+ * Material 3 ColorScheme Standard (Zero-Legacy Clean System)
+ * 1:1 Parity with Flutter ThemeData.colorScheme
+ */
+
+:root {
+  /* 1. Primary & Tonal Brand Spectrum */
+  --md-sys-color-primary: #0066FF;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: rgba(0, 102, 255, 0.08);
+  --md-sys-color-on-primary-container: #0052CC;
+  --md-sys-color-primary-glow: rgba(0, 102, 255, 0.35);
+
+  /* Primary Tonal Steps for Gradients */
+  --md-sys-color-primary-light: #0A84FF;
+  --md-sys-color-primary-dark: #0052CC;
+
+  /* 2. Surface Container 5-Level Hierarchy (Light Mode) */
+  --md-sys-color-surface-container-lowest: #f8fafc;
+  --md-sys-color-surface-container-low: rgba(255, 255, 255, 0.88);
+  --md-sys-color-surface-container: rgba(241, 245, 249, 0.8);
+  --md-sys-color-surface-container-high: rgba(255, 255, 255, 0.75);
+  --md-sys-color-surface-container-highest: #ffffff;
+
+  /* 3. Surface Foregrounds (Text & Icons) */
+  --md-sys-color-on-surface: #09090b;
+  --md-sys-color-on-surface-variant: #64748b;
+  --md-sys-color-on-surface-muted: #94a3b8;
+
+  /* 4. Outlines & Focus Rings */
+  --md-sys-color-outline: rgba(0, 102, 255, 0.28);
+  --md-sys-color-outline-variant: rgba(0, 0, 0, 0.07);
+  --md-sys-color-ring: var(--md-sys-color-primary-glow);
+
+  /* 5. Semantic Status Palette */
+  --md-sys-color-error: #f43f5e;
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: rgba(244, 63, 94, 0.12);
+  --md-sys-color-on-error-container: #e11d48;
+
+  --md-sys-color-success: #10b981;
+  --md-sys-color-on-success: #ffffff;
+  --md-sys-color-success-container: rgba(16, 185, 129, 0.12);
+  --md-sys-color-on-success-container: #059669;
+
+  --md-sys-color-warning: #f59e0b;
+  --md-sys-color-on-warning: #ffffff;
+  --md-sys-color-warning-container: rgba(245, 158, 11, 0.12);
+  --md-sys-color-on-warning-container: #d97706;
+
+  /* 6. Elevation & Depth Shadows */
+  --md-sys-elevation-level1: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+  --md-sys-elevation-level2: 0 4px 12px -2px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+  --md-sys-elevation-level3: 0 16px 36px -12px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.03), inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
+  --md-sys-elevation-level4: 0 28px 60px -12px rgba(15, 23, 42, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05), inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
+}
+
+.dark {
+  /* 1. Primary & Tonal Brand Spectrum (Dark Mode) */
+  --md-sys-color-primary: #0A84FF;
+  --md-sys-color-on-primary: #09090b;
+  --md-sys-color-primary-container: rgba(0, 102, 255, 0.16);
+  --md-sys-color-on-primary-container: #0A84FF;
+  --md-sys-color-primary-glow: rgba(0, 102, 255, 0.45);
+
+  --md-sys-color-primary-light: #0A84FF;
+  --md-sys-color-primary-dark: #0066FF;
+
+  /* 2. Surface Container 5-Level Hierarchy (Dark Mode) */
+  --md-sys-color-surface-container-lowest: #09090d;
+  --md-sys-color-surface-container-low: rgba(18, 18, 26, 0.82);
+  --md-sys-color-surface-container: rgba(26, 26, 36, 0.75);
+  --md-sys-color-surface-container-high: rgba(24, 24, 34, 0.65);
+  --md-sys-color-surface-container-highest: rgba(38, 38, 52, 0.95);
+
+  /* 3. Surface Foregrounds (Dark Mode) */
+  --md-sys-color-on-surface: #f8fafc;
+  --md-sys-color-on-surface-variant: #94a3b8;
+  --md-sys-color-on-surface-muted: #64748b;
+
+  /* 4. Outlines & Focus Rings (Dark Mode) */
+  --md-sys-color-outline: rgba(0, 102, 255, 0.45);
+  --md-sys-color-outline-variant: rgba(255, 255, 255, 0.08);
+  --md-sys-color-ring: var(--md-sys-color-primary-glow);
+
+  /* 5. Depth Shadows (Dark Mode) */
+  --md-sys-elevation-level3: 0 20px 50px -15px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  --md-sys-elevation-level4: 0 40px 80px -20px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+
+  color-scheme: dark;
+}
