@@ -231,12 +231,27 @@
         { flush: 'post' }
       );
 
-      // Global Event Listeners with Safe Lifecycle Cleanup & Power-User Shortcuts
+      // Global Event Listeners with Safe Lifecycle Cleanup & Power
+      // Shortcuts Modal State
+      const isShortcutsModalOpen = ref(false);
+      function openShortcutsModal() {
+        isShortcutsModalOpen.value = true;
+      }
+      function closeShortcutsModal() {
+        isShortcutsModalOpen.value = false;
+      }
+
+      // 8. Global Keyboard Accelerators & Event Bindings
       function onKeyDown(e) {
-        // 1. Esc to close modals and popovers
+        // 1. Escape -> Close any open modal/popover
         if (e.key === 'Escape') {
-          if (isLanguageModalOpen.value) closeLanguageModal();
+          if (isShortcutsModalOpen.value) {
+            closeShortcutsModal();
+            return;
+          }
           if (isThemePopoverOpen.value) closeThemePopover();
+          if (isLanguageModalOpen.value) closeLanguageModal();
+          if (whimsy && whimsy.isAchievementModalOpen.value) whimsy.closeAchievementModal();
           if (commits.isDetailModalOpen.value) commits.closeCommitDetail();
           if (settings.isSettingsModalOpen.value) settings.closeSettingsModal();
           if (repos.activeRepoMenu.value) repos.closeRepoMenu();
@@ -254,14 +269,35 @@
           return;
         }
 
-        // 3. Ctrl/Cmd + , or Ctrl/Cmd + K -> Open Preferences
-        if ((e.ctrlKey || e.metaKey) && (e.key === ',' || e.key === 'k' || e.key === 'K')) {
+        // 3. Ctrl/Cmd + Shift + C -> Quick Copy Markdown
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'c' || e.key === 'C')) {
+          e.preventDefault();
+          report.copyMd();
+          return;
+        }
+
+        // 4. Ctrl/Cmd + , -> Open System Settings
+        if ((e.ctrlKey || e.metaKey) && e.key === ',') {
           e.preventDefault();
           if (settings.isSettingsModalOpen.value) {
             settings.closeSettingsModal();
           } else {
             settings.openSettingsModal('prompt');
           }
+          return;
+        }
+
+        // 5. Ctrl/Cmd + K or '?' in non-input -> Toggle Shortcuts Guide
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+          e.preventDefault();
+          isShortcutsModalOpen.value = !isShortcutsModalOpen.value;
+          return;
+        }
+
+        const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        if (e.key === '?' && activeTag !== 'input' && activeTag !== 'textarea' && !document.activeElement.isContentEditable) {
+          e.preventDefault();
+          isShortcutsModalOpen.value = !isShortcutsModalOpen.value;
           return;
         }
       }
@@ -370,8 +406,6 @@
         setThemeMode,
         themeMode: theme.themeMode,
         isDark: theme.isDark,
-        themeIcon: theme.themeIcon,
-        themeTitle: theme.themeTitle,
         themeColorClass: theme.themeColorClass,
         customThemeConfig: theme.customConfig,
         colorPresets: theme.colorPresets,
@@ -417,7 +451,6 @@
         filterDate: commits.filterDate,
         filterAuthor: commits.filterAuthor,
         authorOptions: commits.authorOptions,
-        authorsList: commits.authorsList,
         hasMultipleAuthors: commits.hasMultipleAuthors,
         singleAuthorName: commits.singleAuthorName,
         filteredCommits: commits.filteredCommits,
@@ -429,6 +462,11 @@
         closeCommitDetail: commits.closeCommitDetail,
         copyFullSha: commits.copyFullSha,
         copyCommitMsg: commits.copyCommitMsg,
+
+        // Shortcuts Guide
+        isShortcutsModalOpen,
+        openShortcutsModal,
+        closeShortcutsModal,
 
         // Settings
         isSettingsModalOpen: settings.isSettingsModalOpen,
@@ -472,6 +510,9 @@
   if (window.CustomSelect) app.component('CustomSelect', window.CustomSelect);
   if (window.SegmentedControl) app.component('SegmentedControl', window.SegmentedControl);
   if (window.RepoTagList) app.component('RepoTagList', window.RepoTagList);
+  if (window.AppHeader) app.component('AppHeader', window.AppHeader);
+  if (window.CommitList) app.component('CommitList', window.CommitList);
+  if (window.KeyboardShortcutsModal) app.component('KeyboardShortcutsModal', window.KeyboardShortcutsModal);
   if (window.ReportEditor) app.component('ReportEditor', window.ReportEditor);
   if (window.ThemeCustomizerPopover) app.component('ThemeCustomizerPopover', window.ThemeCustomizerPopover);
   if (window.CommitDetailModal) app.component('CommitDetailModal', window.CommitDetailModal);

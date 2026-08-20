@@ -213,6 +213,16 @@
         achievementDesc: '恭喜你！在代码与日报之间保持了最纯粹的好奇心与探索欲。',
         achievementQuote: '「Talk is cheap, show me the daily report.」',
         closeAchievement: '低调收下'
+      },
+      shortcuts: {
+        title: '键盘快捷键指南',
+        subtitle: '大幅提升日常生产力的全局快捷操作',
+        generateReport: '一键生成 AI 智能日报',
+        copyMarkdown: '快速复制 Markdown 格式',
+        openSettings: '打开系统与 AI 参数设置',
+        toggleShortcuts: '呼出 / 隐藏快捷键指南',
+        escape: '关闭当前弹窗 / 撤销',
+        close: '我知道了'
       }
     },
 
@@ -413,6 +423,16 @@
         achievementDesc: 'Congratulations! You kept pure curiosity and exploration between code and reports.',
         achievementQuote: '"Talk is cheap, show me the daily report."',
         closeAchievement: 'Keep It Low-key'
+      },
+      shortcuts: {
+        title: 'Keyboard Shortcuts',
+        subtitle: 'Global shortcuts to boost your daily workflow',
+        generateReport: 'Generate AI Daily Report',
+        copyMarkdown: 'Quick Copy Markdown Format',
+        openSettings: 'Open System & AI Settings',
+        toggleShortcuts: 'Toggle Shortcuts Guide',
+        escape: 'Dismiss Modal / Cancel',
+        close: 'Got It'
       }
     },
 
@@ -613,6 +633,16 @@
         achievementDesc: 'おめでとうございます！コードと日報の間に純粋な探求心を保ち続けました。',
         achievementQuote: '「Talk is cheap, show me the daily report.」',
         closeAchievement: 'そっと受け取る'
+      },
+      shortcuts: {
+        title: 'キーボードショートカット',
+        subtitle: '作業効率を飛躍的に高めるグローバルショートカット',
+        generateReport: 'AI日報をワンクリック生成',
+        copyMarkdown: 'Markdown形式を素早くコピー',
+        openSettings: 'システム・AI設定を開く',
+        toggleShortcuts: 'ショートカットガイドの開閉',
+        escape: 'モーダルを閉じる / キャンセル',
+        close: '了解しました'
       }
     },
 
@@ -813,6 +843,16 @@
         achievementDesc: '축하합니다! 코드와 일일보고 사이에서 순수한 호기심과 탐구심을 지켜내셨습니다.',
         achievementQuote: '「Talk is cheap, show me the daily report.」',
         closeAchievement: '조용히 받기'
+      },
+      shortcuts: {
+        title: '키보드 단축키 안내',
+        subtitle: '일일 워크플로우를 가속화하는 글로벌 단축키',
+        generateReport: 'AI 일일 업무보고 즉시 생성',
+        copyMarkdown: 'Markdown 형식 빠른 복사',
+        openSettings: '시스템 및 AI 설정 열기',
+        toggleShortcuts: '단축키 가이드 표시/숨김',
+        escape: '팝업 닫기 / 취소',
+        close: '확인'
       }
     }
   };
