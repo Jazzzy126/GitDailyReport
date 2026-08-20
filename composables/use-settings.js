@@ -1,6 +1,6 @@
 /**
  * useSettings Composable
- * Settings Modal, Prompts & AI Model Configuration, Connection Testing
+ * Settings Modal, Prompts & AI Model Configuration, Multi-Template Management, Connection Testing
  */
 
 (function (window) {
@@ -8,7 +8,7 @@
     const { ref, reactive } = window.Vue;
 
     const isSettingsModalOpen = ref(false);
-    const settingsTab = ref('prompt'); // 'prompt' | 'ai'
+    const settingsTab = ref('prompt'); // 'prompt' | 'ai' | 'theme'
     const isTestingConnection = ref(false);
 
     const aiConfig = reactive({
@@ -17,8 +17,12 @@
       baseUrl: 'https://api.deepseek.com/v1',
       model: 'deepseek-chat',
       itemCount: '2-3',
-      systemPrompt: window.AIService ? window.AIService.DEFAULT_SYSTEM_PROMPT : ''
+      templateId: 'technical',
+      customPrompts: {},
+      systemPrompt: ''
     });
+
+    const reportTemplates = window.AIService ? window.AIService.REPORT_TEMPLATES : [];
 
     function loadConfig() {
       if (!window.AIService) return;
@@ -28,7 +32,29 @@
       aiConfig.baseUrl = loaded.baseUrl || 'https://api.deepseek.com/v1';
       aiConfig.model = loaded.model || 'deepseek-chat';
       aiConfig.itemCount = loaded.itemCount || '2-3';
-      aiConfig.systemPrompt = loaded.systemPrompt || window.AIService.DEFAULT_SYSTEM_PROMPT;
+      aiConfig.templateId = loaded.templateId || 'technical';
+      aiConfig.customPrompts = loaded.customPrompts || {};
+      
+      const currentPrompt = aiConfig.customPrompts[aiConfig.templateId] || loaded.systemPrompt;
+      aiConfig.systemPrompt = currentPrompt || (reportTemplates[0] ? reportTemplates[0].prompt : '');
+    }
+
+    function setTemplate(tplId, silent = false) {
+      // 1. Save current prompt to active template before switching
+      if (aiConfig.templateId && aiConfig.systemPrompt) {
+        aiConfig.customPrompts[aiConfig.templateId] = aiConfig.systemPrompt;
+      }
+
+      // 2. Switch to new template
+      aiConfig.templateId = tplId;
+      const found = reportTemplates.find(t => t.id === tplId);
+      if (found) {
+        aiConfig.systemPrompt = aiConfig.customPrompts[tplId] || found.prompt;
+        window.AIService.saveConfig(aiConfig);
+        if (!silent) {
+          showToast('已切换至「' + found.name + '」模板');
+        }
+      }
     }
 
     function openSettingsModal(tab = 'prompt') {
@@ -61,24 +87,35 @@
 
     function resetDefaultPrompt() {
       if (window.AIService) {
-        aiConfig.systemPrompt = window.AIService.DEFAULT_SYSTEM_PROMPT;
-        showToast('✨ 已重置为默认高精简提示词');
+        const found = reportTemplates.find(t => t.id === aiConfig.templateId);
+        if (found) {
+          aiConfig.systemPrompt = found.prompt;
+          aiConfig.customPrompts[aiConfig.templateId] = found.prompt;
+          window.AIService.saveConfig(aiConfig);
+          showToast(`✨ 已恢复「${found.name}」的系统默认提示词`);
+        }
       }
     }
 
     function saveSettings() {
       if (window.AIService) {
+        if (aiConfig.templateId && aiConfig.systemPrompt) {
+          aiConfig.customPrompts[aiConfig.templateId] = aiConfig.systemPrompt;
+        }
+
         window.AIService.saveConfig({
           provider: aiConfig.provider,
           apiKey: (aiConfig.apiKey || '').trim(),
           baseUrl: (aiConfig.baseUrl || '').trim(),
           model: (aiConfig.model || '').trim(),
           itemCount: aiConfig.itemCount,
+          templateId: aiConfig.templateId,
+          customPrompts: aiConfig.customPrompts,
           systemPrompt: (aiConfig.systemPrompt || '').trim()
         });
       }
       isSettingsModalOpen.value = false;
-      showToast('⚙️ 系统设置（生成条数与 AI 配置）保存成功');
+      showToast('⚙️ 配置保存成功');
     }
 
     async function testConnection() {
@@ -108,6 +145,8 @@
       settingsTab,
       isTestingConnection,
       aiConfig,
+      reportTemplates,
+      setTemplate,
       loadConfig,
       openSettingsModal,
       closeSettingsModal,

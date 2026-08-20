@@ -1,6 +1,7 @@
 /**
  * useCommits Composable
  * Commits filtering by author & date, commit inspector modal management
+ * Optimized for performance and clean memoization
  */
 
 (function (window) {
@@ -19,8 +20,15 @@
     const activeDetailCommit = ref(null);
     const isDetailModalOpen = ref(false);
 
+    // O(N) single-pass author extraction
     const authorsList = computed(() => {
-      return Array.from(new Set((mergedCommits.value || []).map(c => c.author))).filter(Boolean);
+      const list = mergedCommits.value;
+      if (!list || list.length === 0) return [];
+      const set = new Set();
+      for (let i = 0; i < list.length; i++) {
+        if (list[i].author) set.add(list[i].author);
+      }
+      return Array.from(set);
     });
 
     const hasMultipleAuthors = computed(() => authorsList.value.length > 1);
@@ -28,28 +36,35 @@
 
     // Dynamic Author Options from mergedCommits
     const authorOptions = computed(() => {
-      return [
-        { value: 'all', label: '所有提交人' },
-        ...authorsList.value.map(a => ({ value: a, label: a }))
-      ];
+      const authors = authorsList.value;
+      const options = [{ value: 'all', label: '所有提交人' }];
+      for (let i = 0; i < authors.length; i++) {
+        options.push({ value: authors[i], label: authors[i] });
+      }
+      return options;
     });
 
-    // Filtered Commits
+    // High-performance Filtered Commits
     const filteredCommits = computed(() => {
-      const d = filterDate.value;
-      const a = filterAuthor.value;
+      const list = mergedCommits.value;
+      if (!list || list.length === 0) return [];
 
-      return (mergedCommits.value || []).filter(c => {
-        // Author check
-        if (a !== 'all' && c.author !== a) return false;
+      const targetDate = filterDate.value ? filterDate.value.trim() : '';
+      const targetAuthor = filterAuthor.value;
 
-        // Date check
-        if (d && d.trim()) {
-          if (c.date !== d.trim()) return false;
-        }
+      // Fast path: no filtering
+      if (!targetDate && targetAuthor === 'all') {
+        return list;
+      }
 
-        return true;
-      });
+      const result = [];
+      for (let i = 0; i < list.length; i++) {
+        const c = list[i];
+        if (targetAuthor !== 'all' && c.author !== targetAuthor) continue;
+        if (targetDate && c.date !== targetDate) continue;
+        result.push(c);
+      }
+      return result;
     });
 
     // Commit Detail Inspector Actions
