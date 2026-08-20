@@ -25,27 +25,54 @@
       });
     }
 
-    // 3. Dynamic Typewriter Effect for Report Generation
+    // 3. Adaptive Token Stream Typewriter Effect for Report Generation
     function runTypewriter(targetEl, text, onProgress, onComplete) {
       if (!targetEl || !text) {
         if (onComplete) onComplete();
         return;
       }
 
-      let current = '';
-      let index = 0;
-      const speed = Math.max(8, Math.min(25, Math.floor(1500 / text.length)));
-
-      const timer = setInterval(() => {
-        if (index < text.length) {
-          current += text[index];
-          index++;
-          if (onProgress) onProgress(current);
+      // Tokenize text into chunks (words / characters / punctuation)
+      const tokens = [];
+      let i = 0;
+      while (i < text.length) {
+        const char = text[i];
+        if (char === '\n') {
+          tokens.push('\n');
+          i++;
+        } else if (/[\s，。！？；：、.,!?;:]/.test(char)) {
+          tokens.push(char);
+          i++;
         } else {
-          clearInterval(timer);
+          // Chunk 1 to 3 characters per token
+          const chunkSize = Math.floor(Math.random() * 2) + 1;
+          tokens.push(text.slice(i, i + chunkSize));
+          i += chunkSize;
+        }
+      }
+
+      let current = '';
+      let tokenIndex = 0;
+
+      function step() {
+        if (tokenIndex < tokens.length) {
+          const t = tokens[tokenIndex];
+          current += t;
+          tokenIndex++;
+          if (onProgress) onProgress(current);
+
+          let delay = 12;
+          if (t === '\n') delay = 45;
+          else if (/[。！？!?]/.test(t)) delay = 35;
+          else if (/[，；、,;]/.test(t)) delay = 20;
+
+          setTimeout(step, delay);
+        } else {
           if (onComplete) onComplete();
         }
-      }, speed);
+      }
+
+      step();
     }
 
     // 4. Vanta.js Dynamic Ambient Fog Background (Apple Atmosphere)

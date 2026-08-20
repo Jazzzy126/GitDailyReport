@@ -630,3 +630,192 @@ html, body {
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-large);
 }
+
+/* ==========================================
+   9. Design System Micro-Interactions & Polishing
+   ========================================== */
+
+/* Global Brand Text Selection */
+::selection {
+  background-color: var(--md-sys-color-primary);
+  color: #ffffff;
+}
+
+/* Global Tactile Active Spring Scale */
+.ios-press-action,
+.studio-btn,
+.studio-badge-btn,
+.studio-icon-btn,
+.studio-split-main,
+.date-pill-btn {
+  transition: transform var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-spring),
+              background-color 0.2s ease,
+              box-shadow 0.2s ease,
+              border-color 0.2s ease;
+}
+.ios-press-action:active,
+.studio-btn:active,
+.studio-badge-btn:active,
+.studio-icon-btn:active,
+.date-pill-btn:active {
+  transform: scale(0.96);
+}
+
+/* Timeline Pulse Dot Indicator */
+.timeline-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.commit-stream-item:hover .timeline-dot {
+  transform: scale(1.3);
+}
+.timeline-dot-feat {
+  background-color: var(--md-sys-color-success);
+  box-shadow: 0 0 8px var(--md-sys-color-success);
+}
+.timeline-dot-fix {
+  background-color: var(--md-sys-color-error);
+  box-shadow: 0 0 8px var(--md-sys-color-error);
+}
+.timeline-dot-refactor {
+  background-color: var(--md-sys-color-warning);
+  box-shadow: 0 0 8px var(--md-sys-color-warning);
+}
+.timeline-dot-docs,
+.timeline-dot-style {
+  background-color: var(--md-sys-color-primary);
+  box-shadow: 0 0 8px var(--md-sys-color-primary-glow);
+}
+.timeline-dot-chore,
+.timeline-dot-ci,
+.timeline-dot-test {
+  background-color: rgba(160, 160, 175, 0.7);
+  box-shadow: 0 0 6px rgba(160, 160, 175, 0.4);
+}
+
+/* Quick Date Filter Pills */
+.date-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--md-sys-shape-corner-small);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background-color: var(--md-sys-color-surface-container-low);
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  user-select: none;
+}
+.date-pill-btn:hover {
+  background-color: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface);
+  border-color: var(--md-sys-color-outline);
+}
+.date-pill-btn.active {
+  background-color: var(--md-sys-color-primary);
+  color: #ffffff;
+  border-color: var(--md-sys-color-primary);
+  box-shadow: 0 2px 8px var(--md-sys-color-primary-glow);
+}
+
+/* Editor Ready Hero State */
+.editor-hero-ready {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  background: radial-gradient(circle at 50% 30%, var(--md-sys-color-primary-subtle) 0%, transparent 70%);
+}
+
+/* Shimmer Pulse for Primary Generate Action */
+.studio-split-pulse {
+  position: relative;
+  overflow: hidden;
+}
+.studio-split-pulse::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 80%
+  );
+  transform: rotate(25deg);
+  animation: buttonShimmer 3.5s infinite;
+  pointer-events: none;
+}
+@keyframes buttonShimmer {
+  0% {
+    transform: translateX(-100%) rotate(25deg);
+  }
+  40%, 100% {
+    transform: translateX(100%) rotate(25deg);
+  }
+}
+
+/* Markdown Visual Preview Body */
+.markdown-preview-body {
+  font-family: var(--md-sys-typeface-plain);
+  color: var(--md-sys-color-on-surface);
+  line-height: 1.75;
+  font-size: 13.5px;
+  user-select: text;
+}
+.markdown-preview-body h1,
+.markdown-preview-body h2,
+.markdown-preview-body h3 {
+  font-family: var(--md-sys-typeface-brand);
+  font-weight: 800;
+  color: var(--md-sys-color-primary);
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+.markdown-preview-body h1 { font-size: 1.15rem; }
+.markdown-preview-body h2 { font-size: 1.05rem; }
+.markdown-preview-body h3 { font-size: 0.95rem; }
+.markdown-preview-body p {
+  margin-bottom: 0.65rem;
+}
+.markdown-preview-body ul,
+.markdown-preview-body ol {
+  padding-left: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+.markdown-preview-body li {
+  margin-bottom: 0.35rem;
+}
+.markdown-preview-body strong {
+  color: var(--md-sys-color-primary-dark);
+  font-weight: 700;
+}
+.dark .markdown-preview-body strong {
+  color: var(--md-sys-color-primary-light);
+}
+.markdown-preview-body code {
+  font-family: var(--md-sys-typeface-code);
+  font-size: 0.85em;
+  padding: 0.15em 0.4em;
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-primary);
+  border-radius: 4px;
+}
+.markdown-preview-body blockquote {
+  border-left: 3px solid var(--md-sys-color-primary);
+  padding-left: 0.75rem;
+  margin-left: 0;
+  opacity: 0.85;
+}

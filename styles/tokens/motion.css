@@ -38,6 +38,29 @@
   }
 }
 
+@keyframes cursorBlink {
+  0%, 100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 0.15;
+    transform: scaleY(0.85);
+  }
+}
+
+.typing-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 1.15em;
+  vertical-align: -0.15em;
+  background-color: var(--md-sys-color-primary);
+  border-radius: 2px;
+  box-shadow: 0 0 8px var(--md-sys-color-primary-glow);
+  animation: cursorBlink 0.85s infinite ease-in-out;
+  margin-left: 2px;
+}
+
 /* Reduced Motion Accessible Fallback */
 @media (prefers-reduced-motion: reduce) {
   *,
