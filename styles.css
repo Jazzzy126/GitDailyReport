@@ -257,19 +257,76 @@ body {
   flex-shrink: 0;
 }
 
-/* Capsule Badge Pill */
+/* Capsule Badge Pill (Static / Read-only) */
 .studio-badge-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
-  padding: 0.2rem 0.625rem;
+  padding: 0.25rem 0.625rem;
   font-size: var(--font-size-caption); /* Level 5 Caption: 11px */
   font-weight: 700;
   border-radius: var(--radius-pill);
   background-color: var(--color-brand-subtle);
   color: var(--accent-primary);
   border: 1px solid rgba(0, 102, 255, 0.15);
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition: background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+/* Interactive Badge Button (Interactive Capsule Button) */
+.studio-badge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  font-size: var(--font-size-caption);
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-brand-subtle);
+  color: var(--accent-primary);
+  border: 1px solid rgba(0, 102, 255, 0.15);
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+.studio-badge-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background-color: rgba(0, 102, 255, 0.14);
+  border-color: rgba(0, 102, 255, 0.35);
+  box-shadow: 0 2px 8px -2px rgba(0, 102, 255, 0.25);
+}
+.studio-badge-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+}
+.studio-badge-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.studio-badge-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--accent-primary);
+}
+
+/* Repo Tag Pill Spring Interaction */
+.repo-pill-tag {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+.repo-pill-tag:hover {
+  transform: translateY(-1.5px);
+}
+.repo-pill-tag:active {
+  transform: translateY(0) scale(0.98);
 }
 
 /* Universal Icon Action Button */
@@ -285,14 +342,15 @@ body {
   border: 1px solid var(--border-subtle);
   color: var(--text-primary);
   cursor: pointer;
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.18s ease, border-color 0.18s ease, box-shadow 0.2s ease;
 }
 .studio-icon-btn:hover {
-  transform: scale(1.05);
+  transform: translateY(-1px);
   border-color: var(--accent-primary);
+  box-shadow: 0 3px 10px -2px rgba(0, 0, 0, 0.08);
 }
 .studio-icon-btn:active {
-  transform: scale(0.95);
+  transform: translateY(0) scale(0.96);
 }
 
 /* Drop Zone Styling */
@@ -605,20 +663,64 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   border-radius: var(--radius-outer);
 }
 
-/* iOS Segmented Control Active State */
-.settings-tab-btn {
+/* Apple Studio Pro Segmented Control Design System */
+.studio-segmented-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  background-color: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-middle); /* 12px */
+  user-select: none;
+}
+
+.studio-segmented-slider {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  border-radius: var(--radius-inner); /* 8px - 100% concentric with 12px outer */
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
+
+.dark .studio-segmented-slider {
+  background-color: #27272a;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+.studio-segmented-item {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  padding: 8px 14px;
+  font-size: var(--font-size-control); /* 12px */
+  font-weight: 700;
   border-radius: var(--radius-inner);
-  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: color 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--text-muted);
+  border: none;
+  background: transparent;
+  text-decoration: none;
 }
-.settings-tab-btn.active-settings-tab {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.12), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+
+.studio-segmented-item.is-active {
+  color: var(--text-primary) !important;
 }
-.dark .settings-tab-btn.active-settings-tab {
-  background-color: #334155 !important;
-  color: #f8fafc !important;
-  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.4) !important;
+
+.studio-segmented-item:hover:not(.is-active) {
+  color: var(--text-secondary);
 }
 
 /* Interactive Spring Pressure Scale */
@@ -627,6 +729,29 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 }
 .ios-press-action:active {
   transform: scale(0.985);
+}
+
+/* Commit Stream Single Line Item */
+.commit-stream-item {
+  background-color: rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--border-subtle);
+  transition: background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.commit-stream-item:hover {
+  background-color: var(--color-brand-subtle);
+  border-color: rgba(0, 102, 255, 0.3);
+  box-shadow: 0 2px 8px -2px rgba(0, 102, 255, 0.12);
+}
+.dark .commit-stream-item {
+  background-color: rgba(255, 255, 255, 0.025);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.dark .commit-stream-item:hover {
+  background-color: rgba(0, 102, 255, 0.12);
+  border-color: rgba(0, 102, 255, 0.4);
 }
 
 /* Custom Scrollbar */

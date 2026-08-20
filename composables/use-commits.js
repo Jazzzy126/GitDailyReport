@@ -19,8 +19,10 @@
     const activeDetailCommit = ref(null);
     const isDetailModalOpen = ref(false);
 
+    const totalCommitsCount = computed(() => (mergedCommits.value ? mergedCommits.value.length : 0));
+
     const authorsList = computed(() => {
-      return Array.from(new Set(mergedCommits.value.map(c => c.author))).filter(Boolean);
+      return Array.from(new Set((mergedCommits.value || []).map(c => c.author))).filter(Boolean);
     });
 
     const hasMultipleAuthors = computed(() => authorsList.value.length > 1);
@@ -39,13 +41,13 @@
       const d = filterDate.value;
       const a = filterAuthor.value;
 
-      return mergedCommits.value.filter(c => {
+      return (mergedCommits.value || []).filter(c => {
         // Author check
         if (a !== 'all' && c.author !== a) return false;
 
         // Date check
         if (d && d.trim()) {
-          return c.date === d.trim();
+          if (c.date !== d.trim()) return false;
         }
 
         return true;
@@ -79,6 +81,7 @@
     return {
       filterDate,
       filterAuthor,
+      totalCommitsCount,
       authorOptions,
       authorsList,
       hasMultipleAuthors,

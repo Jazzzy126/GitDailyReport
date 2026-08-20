@@ -1,0 +1,114 @@
+/**
+ * RepoTagList Component
+ * Apple Studio Pro Multi-Repo Tag Pills Scrollbar with Context Menu Trigger
+ */
+
+(function (window) {
+  const { toRefs } = window.Vue;
+
+  const RepoTagList = {
+    name: 'RepoTagList',
+    props: {
+      recentRepos: { type: Array, default: () => [] },
+      selectedRepoNames: { type: Array, default: () => [] },
+      activeRepoMenu: { type: String, default: '' },
+      repoAliases: { type: Object, default: () => ({}) }
+    },
+    emits: ['toggle-select-all', 'toggle-selection', 'open-menu'],
+    setup(props, { emit }) {
+      const { recentRepos, selectedRepoNames, activeRepoMenu, repoAliases } = toRefs(props);
+
+      function getDisplayName(name) {
+        return (repoAliases.value && repoAliases.value[name]) || name;
+      }
+
+      function onToggleSelectAll() {
+        emit('toggle-select-all');
+      }
+
+      function onToggleSelection(repoName) {
+        emit('toggle-selection', repoName);
+      }
+
+      function onOpenMenu(repoName) {
+        emit('open-menu', repoName);
+      }
+
+      return {
+        recentRepos,
+        selectedRepoNames,
+        activeRepoMenu,
+        getDisplayName,
+        onToggleSelectAll,
+        onToggleSelection,
+        onOpenMenu
+      };
+    },
+    template: `
+      <div v-if="recentRepos.length > 0" class="shrink-0">
+        <div class="flex items-center justify-between text-xs mb-2">
+          <span class="font-extrabold opacity-70 flex items-center gap-1.5">
+            <studio-icon name="layers" class="w-3.5 h-3.5 text-[var(--accent-primary)]"></studio-icon>
+            <span>最近项目 (点击标签多选)</span>
+          </span>
+          <button
+            type="button"
+            @click="onToggleSelectAll"
+            class="text-[11px] font-extrabold text-[var(--accent-primary)] hover:underline cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] rounded px-1"
+            :aria-label="selectedRepoNames.length === recentRepos.length ? '清空所有已选项目' : '全选所有最近项目'">
+            {{ selectedRepoNames.length === recentRepos.length ? '清空选择' : '全选项目' }}
+          </button>
+        </div>
+
+        <div id="recent-pills-container" class="flex items-center gap-2 overflow-x-auto custom-scrollbar px-1 py-1.5">
+          <div v-for="r in recentRepos" :key="r.repoName" class="shrink-0">
+            <div
+              @click="onToggleSelection(r.repoName)"
+              @contextmenu.prevent="onOpenMenu(r.repoName)"
+              role="checkbox"
+              :aria-checked="selectedRepoNames.includes(r.repoName)"
+              tabindex="0"
+              @keydown.space.prevent="onToggleSelection(r.repoName)"
+              @keydown.enter.prevent="onToggleSelection(r.repoName)"
+              :class="[
+                'repo-pill-tag px-2.5 py-1.5 text-xs font-bold rounded-lg border flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] select-none',
+                selectedRepoNames.includes(r.repoName)
+                  ? 'bg-[var(--color-brand-subtle)] text-[var(--accent-primary)] border-[var(--accent-primary)]/40 shadow-xs font-extrabold hover:border-[var(--accent-primary)]/70 hover:shadow-xs'
+                  : 'bg-black/5 dark:bg-white/5 text-[var(--foreground)] border-black/5 dark:border-white/10 opacity-75 hover:opacity-100 hover:bg-black/10 dark:hover:bg-white/10 hover:border-black/10 dark:border-white/20 hover:shadow-xs'
+              ]">
+              <studio-icon
+                v-if="selectedRepoNames.includes(r.repoName)"
+                name="check"
+                class="w-3.5 h-3.5 text-[var(--accent-primary)] shrink-0"></studio-icon>
+              <studio-icon
+                v-else
+                name="git-branch"
+                class="w-3.5 h-3.5 shrink-0 opacity-70"></studio-icon>
+
+              <span class="truncate max-w-36 leading-none" :title="'真实仓库名: ' + r.repoName">
+                {{ getDisplayName(r.repoName) }}
+              </span>
+
+              <!-- 常驻微型更多操作按钮 (⋯) -->
+              <button
+                type="button"
+                @click.stop="onOpenMenu(r.repoName)"
+                :class="[
+                  'w-5 h-5 inline-flex items-center justify-center rounded-md transition-all duration-150 cursor-pointer focus-visible:ring-1 focus-visible:ring-[var(--accent-primary)] -mr-1',
+                  activeRepoMenu === r.repoName
+                    ? 'opacity-100 bg-[var(--accent-primary)] text-white shadow-xs font-bold'
+                    : 'opacity-65 hover:opacity-100 text-current hover:bg-black/15 dark:hover:bg-white/25 hover:shadow-2xs active:scale-95'
+                ]"
+                :title="'项目操作菜单: ' + getDisplayName(r.repoName)"
+                :aria-label="'项目操作菜单: ' + getDisplayName(r.repoName)">
+                <studio-icon name="more-horizontal" class="w-3.5 h-3.5"></studio-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  };
+
+  window.RepoTagList = RepoTagList;
+})(window);

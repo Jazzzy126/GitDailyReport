@@ -204,11 +204,18 @@
           toast.showToast('⚙️ 已检测到本地 AI 配置');
         }
 
-        // 5. Global Escape listener
+        // 5. Global Escape & Click Outside listener
         document.addEventListener('keydown', (e) => {
           if (e.key === 'Escape') {
             if (commits.isDetailModalOpen.value) commits.closeCommitDetail();
             if (settings.isSettingsModalOpen.value) settings.closeSettingsModal();
+            if (repos.activeRepoMenu.value) repos.closeRepoMenu();
+          }
+        });
+
+        document.addEventListener('click', (e) => {
+          if (repos.activeRepoMenu.value && !e.target.closest('.repo-menu-container')) {
+            repos.closeRepoMenu();
           }
         });
 
@@ -261,6 +268,11 @@
         toggleDropzone: repos.toggleDropzone,
         getRepoDisplayName: repos.getRepoDisplayName,
         promptEditAlias: repos.promptEditAlias,
+        removeRepo: repos.removeRepo,
+        activeRepoMenu: repos.activeRepoMenu,
+        toggleRepoMenu: repos.toggleRepoMenu,
+        closeRepoMenu: repos.closeRepoMenu,
+        refreshRepoByHandle: repos.refreshRepoByHandle,
         toggleRepoSelection: repos.toggleRepoSelection,
         toggleSelectAllRepos: repos.toggleSelectAllRepos,
         refreshSelectedRepos: repos.refreshSelectedRepos,
@@ -275,6 +287,7 @@
         // Commits
         filterDate: commits.filterDate,
         filterAuthor: commits.filterAuthor,
+        totalCommitsCount: commits.totalCommitsCount,
         authorOptions: commits.authorOptions,
         authorsList: commits.authorsList,
         hasMultipleAuthors: commits.hasMultipleAuthors,
@@ -324,8 +337,12 @@
   if (window.StudioIcon) app.component('StudioIcon', window.StudioIcon);
   if (window.StudioPane) app.component('StudioPane', window.StudioPane);
   if (window.CustomSelect) app.component('CustomSelect', window.CustomSelect);
+  if (window.SegmentedControl) app.component('SegmentedControl', window.SegmentedControl);
+  if (window.RepoTagList) app.component('RepoTagList', window.RepoTagList);
+  if (window.ReportEditor) app.component('ReportEditor', window.ReportEditor);
   if (window.CommitDetailModal) app.component('CommitDetailModal', window.CommitDetailModal);
   if (window.SettingsModal) app.component('SettingsModal', window.SettingsModal);
+  if (window.RepoActionModal) app.component('RepoActionModal', window.RepoActionModal);
   if (window.ToastContainer) app.component('ToastContainer', window.ToastContainer);
   if (window.LoadingOverlay) app.component('LoadingOverlay', window.LoadingOverlay);
 

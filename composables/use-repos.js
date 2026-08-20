@@ -60,6 +60,18 @@
     }
   }
 
+  async function deleteHandleFromDB(repoName) {
+    if (!repoName) return;
+    try {
+      const db = await openHandlesDB();
+      if (!db) return;
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      tx.objectStore(STORE_NAME).delete(repoName);
+    } catch (e) {
+      console.warn('[IndexedDB] 删除目录句柄失败:', e);
+    }
+  }
+
   function useRepos({ showToast, showLoading, hideLoading }) {
     const { ref, reactive, computed, watch } = window.Vue;
 
@@ -68,8 +80,17 @@
     const repoAliases = ref({});
     const isRefreshing = ref(false);
     const isDropzoneCollapsed = ref(false);
+    const activeRepoMenu = ref(null);
     const allRepoMap = reactive(new Map()); // repoName -> commits array
     const repoHandlesMap = new Map(); // repoName -> FileSystemDirectoryHandle (in-memory)
+
+    function toggleRepoMenu(repoName) {
+      activeRepoMenu.value = activeRepoMenu.value === repoName ? null : repoName;
+    }
+
+    function closeRepoMenu() {
+      activeRepoMenu.value = null;
+    }
 
     function toggleDropzone() {
       isDropzoneCollapsed.value = !isDropzoneCollapsed.value;
@@ -105,6 +126,7 @@
     }
 
     function promptEditAlias(repoName) {
+      closeRepoMenu();
       const currentAlias = getRepoDisplayName(repoName);
       const input = prompt(`请输入项目「${repoName}」的自定义别名（例如: 前端UI / 后端API）:`, currentAlias !== repoName ? currentAlias : '');
       if (input !== null) {
@@ -154,6 +176,41 @@
       try {
         localStorage.setItem(SELECTED_REPOS_KEY, JSON.stringify(selectedRepoNames.value));
       } catch (e) { }
+    }
+
+    function removeRepo(repoName) {
+      if (!repoName) return;
+      closeRepoMenu();
+      const displayName = getRepoDisplayName(repoName);
+
+      // 1. 从最近仓库列表移除并持久化
+      recentRepos.value = recentRepos.value.filter(r => r.repoName !== repoName);
+      try {
+        localStorage.setItem(RECENT_REPOS_KEY, JSON.stringify(recentRepos.value));
+      } catch (e) { }
+
+      // 2. 从当前选中列表中移除并持久化
+      if (selectedRepoNames.value.includes(repoName)) {
+        selectedRepoNames.value = selectedRepoNames.value.filter(name => name !== repoName);
+        saveSelectedNames();
+      }
+
+      // 3. 清理自定义别名
+      if (repoAliases.value[repoName]) {
+        const updatedAliases = { ...repoAliases.value };
+        delete updatedAliases[repoName];
+        repoAliases.value = updatedAliases;
+        try {
+          localStorage.setItem(REPO_ALIASES_KEY, JSON.stringify(updatedAliases));
+        } catch (e) { }
+      }
+
+      // 4. 清理内存缓存与 IndexedDB 句柄
+      allRepoMap.delete(repoName);
+      repoHandlesMap.delete(repoName);
+      deleteHandleFromDB(repoName);
+
+      showToast(`🗑️ 已移除项目「${displayName}」`);
     }
 
     async function initRepoState() {
@@ -652,6 +709,10 @@
       currentRepoBadgeText,
       getRepoDisplayName,
       promptEditAlias,
+      removeRepo,
+      activeRepoMenu,
+      toggleRepoMenu,
+      closeRepoMenu,
       toggleRepoSelection,
       toggleSelectAllRepos,
       initRepoState,
