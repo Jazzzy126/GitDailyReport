@@ -27,6 +27,75 @@
 
     function stripMarkdownToPlain(mdText) {
       if (!mdText) return '';
+
+      // 优先使用 marked.lexer 工业级 AST 解析提取纯文本
+      if (window.marked && typeof window.marked.lexer === 'function') {
+        try {
+          const tokens = window.marked.lexer(mdText);
+          const extractText = (tokenList) => {
+            let result = '';
+            for (const token of tokenList) {
+              switch (token.type) {
+                case 'heading':
+                  result += `${extractText(token.tokens || [{ text: token.text }])}\n\n`;
+                  break;
+                case 'paragraph':
+                  result += `${extractText(token.tokens || [{ text: token.text }])}\n\n`;
+                  break;
+                case 'list':
+                  token.items.forEach((item, index) => {
+                    const prefix = token.ordered ? `${index + 1}. ` : '• ';
+                    result += `${prefix}${extractText(item.tokens || [{ text: item.text }]).trim()}\n`;
+                  });
+                  result += '\n';
+                  break;
+                case 'list_item':
+                  result += `${extractText(token.tokens || [{ text: token.text }])}\n`;
+                  break;
+                case 'blockquote':
+                  result += `${extractText(token.tokens || [{ text: token.text }])}\n`;
+                  break;
+                case 'code':
+                  result += `${token.text}\n\n`;
+                  break;
+                case 'codespan':
+                case 'text':
+                case 'escape':
+                  result += token.text || '';
+                  break;
+                case 'strong':
+                case 'em':
+                case 'del':
+                case 'link':
+                  result += extractText(token.tokens || [{ text: token.text }]);
+                  break;
+                case 'image':
+                  result += token.text ? `[图片: ${token.text}]` : '';
+                  break;
+                case 'space':
+                case 'hr':
+                  result += '\n';
+                  break;
+                default:
+                  if (token.tokens) {
+                    result += extractText(token.tokens);
+                  } else if (token.text) {
+                    result += token.text;
+                  }
+                  break;
+              }
+            }
+            return result;
+          };
+
+          const text = extractText(tokens).replace(/\n{3,}/g, '\n\n').trim();
+          if (text) return text;
+        } catch (e) {
+          console.warn('[useReport] marked lexer 解析异常，使用降级逻辑', e);
+        }
+      }
+
+      // 降级正则兜底
       return mdText
         .replace(/^#+\s+(.*$)/gm, '$1\n')
         .replace(/\*\*([^*]+)\*\*/g, '$1')
