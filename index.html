@@ -117,72 +117,28 @@
 
   <div id="app" class="h-full flex flex-col flex-1 relative z-10 lg:overflow-hidden" v-cloak>
 
-    <!-- Floating Liquid Glass Header Navbar -->
-    <header class="w-full max-w-[1536px] mx-auto px-3 pt-3 shrink-0 z-40 sticky top-0">
-      <div
-        class="ios-header h-13 px-4 rounded-2xl flex items-center justify-between shadow-xl backdrop-blur-2xl border border-white/40 dark:border-white/10 transition-all duration-300">
-
-        <!-- Header Left: Logo & Brand Title (Easter Egg Clicker) -->
-        <div class="flex items-center gap-3 shrink-0 cursor-pointer select-none group" @click="handleLogoClick" title="✨ 点击探索隐藏极客彩蛋">
-          <div
-            class="w-8.5 h-8.5 rounded-xl bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center shadow-md shrink-0 group-hover:-translate-y-0.5 group-hover:rotate-6 group-hover:shadow-lg active:scale-90 transition-all duration-200"
-            aria-hidden="true">
-            <i data-lucide="git-pull-request" class="w-4 h-4 text-[var(--md-sys-color-primary)]"></i>
-          </div>
-          <div class="flex items-center gap-2.5">
-            <span class="font-heading font-black text-sm sm:text-base tracking-tight truncate">{{ t('app.title') }}</span>
-            <span class="hidden sm:inline-flex studio-badge-pill font-mono">
-              <span class="w-1.5 h-1.5 rounded-full bg-[var(--md-sys-color-primary)] animate-pulse" aria-hidden="true"></span>
-              {{ t('app.tagline') }}
-            </span>
-          </div>
-        </div>
-
-        <!-- Header Right: Language Switcher, Theme Popover & Settings Button -->
-        <div class="flex items-center gap-2 shrink-0 relative">
-          <!-- Language Switcher Trigger Button (Beside Theme Button) -->
-          <button type="button" @click.stop="openLanguageModal"
-            class="studio-icon-btn focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)] relative group"
-            :title="t('app.openLanguageModal') + ' (' + currentLocaleInfo.label + ')'"
-            :aria-label="t('app.openLanguageModal')">
-            <studio-icon name="languages" class="w-4 h-4 text-[var(--md-sys-color-primary)] group-hover:scale-110 transition-transform"></studio-icon>
-          </button>
-
-          <!-- Theme Customizer Trigger Button -->
-          <button type="button" @click.stop="toggleThemePopover"
-            class="studio-icon-btn focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)] relative"
-            :title="t('app.theme')"
-            :aria-label="t('app.theme')"
-            :aria-expanded="isThemePopoverOpen">
-            <studio-icon name="palette" :class="['w-4 h-4', themeColorClass]"></studio-icon>
-          </button>
-
-          <!-- Floating Theme Customizer Popover -->
-          <theme-customizer-popover
-            :is-open="isThemePopoverOpen"
-            :theme-mode="themeMode"
-            :theme-custom-config="customThemeConfig"
-            :color-presets="colorPresets"
-            :radius-presets="radiusPresets"
-            :glass-presets="glassPresets"
-            @close="closeThemePopover"
-            @set-theme-mode="setThemeMode"
-            @set-color-preset="setColorPreset"
-            @set-radius-preset="setRadiusPreset"
-            @set-glass-preset="setGlassPreset"
-            @reset-theme-custom="resetCustomConfig"></theme-customizer-popover>
-
-          <!-- System Settings Modal Trigger -->
-          <button type="button" @click="openSettingsModal('prompt')"
-            class="studio-icon-btn focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)]" 
-            :title="t('app.settings')"
-            :aria-label="t('app.settings')">
-            <i data-lucide="settings" class="w-4 h-4 opacity-80" aria-hidden="true"></i>
-          </button>
-        </div>
-
-      </div>
-    </header>
+    <!-- Floating Liquid Glass Header Navbar (Componentized) -->
+    <app-header
+      :t="t"
+      :current-locale-info="currentLocaleInfo"
+      :is-theme-popover-open="isThemePopoverOpen"
+      :theme-color-class="themeColorClass"
+      :theme-mode="themeMode"
+      :custom-theme-config="customThemeConfig"
+      :color-presets="colorPresets"
+      :radius-presets="radiusPresets"
+      :glass-presets="glassPresets"
+      @logo-click="handleLogoClick"
+      @open-language="openLanguageModal"
+      @open-shortcuts="openShortcutsModal"
+      @toggle-theme="toggleThemePopover"
+      @close-theme="closeThemePopover"
+      @set-theme-mode="setThemeMode"
+      @set-color-preset="setColorPreset"
+      @set-radius-preset="setRadiusPreset"
+      @set-glass-preset="setGlassPreset"
+      @reset-theme-custom="resetCustomConfig"
+      @open-settings="openSettingsModal"></app-header>
 
     <!-- Studio Workspace Grid: Strict 4-Point Grid Spacing -->
     <main id="main-content"
@@ -248,120 +204,23 @@
           </div>
         </studio-pane>
 
-        <!-- Card 2: 提交记录列表卡片 -->
-        <studio-pane :title="t('commits.title')" icon="git-commit" custom-class="flex-1 min-h-0">
-          <template #header-right>
-            <div class="studio-badge-pill tabular-nums font-mono">
-              <studio-icon name="git-commit" class="w-3 h-3 text-[var(--md-sys-color-primary)]"></studio-icon>
-              <span>{{ t('commits.countBadge', { count: filteredCommits.length }) }}</span>
-            </div>
-          </template>
-
-          <div class="p-4 flex flex-col flex-1 min-h-0 overflow-hidden">
-            <!-- Filter Controls Bar (Clean & Lightweight) -->
-            <div class="mb-3 shrink-0 space-y-2">
-              <!-- 多人协作模式：展示日期 + 提交人双下拉筛选 -->
-              <div v-if="hasMultipleAuthors" class="grid grid-cols-2 gap-2 items-center">
-                <div class="relative w-full">
-                  <input type="date" id="filter-date-input" name="filterDate" v-model="filterDate" :aria-label="t('commits.filterDateLabel')"
-                    class="ios-form-control cursor-pointer">
-                </div>
-                <div class="w-full">
-                  <custom-select v-model="filterAuthor" :options="authorOptions" :placeholder="t('commits.allAuthors')"></custom-select>
-                </div>
-              </div>
-
-              <!-- 单人模式 / 初始状态：自适应单列布局 -->
-              <div v-else class="flex items-center gap-2">
-                <div class="relative flex-1">
-                  <input type="date" id="filter-date-input" name="filterDate" v-model="filterDate" :aria-label="t('commits.filterDateLabel')"
-                    class="ios-form-control cursor-pointer">
-                </div>
-
-                <!-- 当前单作者标签 -->
-                <div v-if="singleAuthorName" class="flex items-center gap-1.5 shrink-0">
-                  <div class="studio-badge-pill text-[11px] py-1.5 px-2.5 max-w-[120px] truncate"
-                    :title="t('commits.currentAuthor', { name: singleAuthorName })">
-                    <studio-icon name="user" class="w-3 h-3 shrink-0 text-[var(--md-sys-color-primary)]"></studio-icon>
-                    <span class="truncate">{{ singleAuthorName }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 极速快捷日期胶囊条 (今天 / 昨天 / 全部) -->
-              <div class="flex items-center gap-1.5 pt-0.5">
-                <button type="button" @click="setDatePreset('today')"
-                  :class="['date-pill-btn', { 'active': activeDatePreset === 'today' }]"
-                  :aria-label="t('commits.todayAria')">
-                  <span class="w-1.5 h-1.5 rounded-full bg-current opacity-70"></span>
-                  <span>{{ t('commits.today') }}</span>
-                </button>
-                <button type="button" @click="setDatePreset('yesterday')"
-                  :class="['date-pill-btn', { 'active': activeDatePreset === 'yesterday' }]"
-                  :aria-label="t('commits.yesterdayAria')">
-                  <span>{{ t('commits.yesterday') }}</span>
-                </button>
-                <button type="button" @click="setDatePreset('all')"
-                  :class="['date-pill-btn', { 'active': activeDatePreset === 'all' }]"
-                  :aria-label="t('commits.allAria')">
-                  <span>{{ t('commits.all') }}</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Commit Stream List -->
-            <div id="commit-list-container"
-              class="max-h-96 lg:max-h-none flex-1 min-h-0 overflow-y-auto space-y-2 pr-1.5 custom-scrollbar">
-              <div v-if="filteredCommits.length === 0" class="text-center opacity-70 text-xs py-8 space-y-3">
-                <studio-icon name="folder-open"
-                  class="w-8 h-8 mx-auto opacity-60 text-[var(--md-sys-color-primary)]"></studio-icon>
-                <div class="font-heading font-bold text-sm text-[var(--md-sys-color-on-surface)]">{{ t('commits.emptyTitle') }}</div>
-                <div class="text-xs opacity-70 max-w-xs mx-auto leading-relaxed">
-                  {{ t('commits.emptyDesc') }}
-                </div>
-              </div>
-
-              <!-- Streamlined Single Commit Line Items -->
-              <div v-for="c in filteredCommits" :key="c.hash + '-' + (c.repoName || '')"
-                @click="openCommitDetail(c)"
-                class="commit-stream-item p-2.5 rounded-xl flex items-center justify-between gap-2.5 group cursor-pointer">
-                
-                <!-- Timeline Colored Pulse Dot -->
-                <span :class="['timeline-dot', 'timeline-dot-' + (c.type || 'chore')]" :title="c.type || 'chore'"></span>
-
-                <div class="min-w-0 flex-1 space-y-1">
-                  <!-- Commit Message Title -->
-                  <div class="text-[13px] truncate font-bold leading-snug text-[var(--md-sys-color-on-surface)]" :title="c.message">
-                    {{ c.message }}
-                  </div>
-
-                  <!-- Metadata & Timeline Subtext Row -->
-                  <div class="flex items-center gap-2 flex-wrap text-[11px] opacity-75">
-                    <span v-if="c.type" :class="['commit-tag', 'commit-tag-' + (c.type || 'chore')]">
-                      {{ c.type }}
-                    </span>
-
-                    <span v-if="isMultiRepoMode && c.repoName"
-                      class="studio-badge-pill text-[10px] shrink-0 truncate max-w-28" :title="c.repoName">
-                      {{ getRepoDisplayName(c.repoName) }}
-                    </span>
-                    <span class="font-mono opacity-60 font-semibold tabular-nums">#{{ c.hash }}</span>
-                    <span class="opacity-70 font-medium truncate">{{ c.author }}</span>
-                    <span class="ml-auto font-mono text-[10px] opacity-50 tabular-nums">{{ c.date?.split(' ')[1] || ''
-                      }}</span>
-                  </div>
-                </div>
-
-                <button type="button" @click.stop="openCommitDetail(c)"
-                  class="studio-icon-btn w-7 h-7 shrink-0 opacity-70 group-hover:opacity-100"
-                  :title="t('commits.viewDetailAria', { hash: c.hash })"
-                  :aria-label="t('commits.viewDetailAria', { hash: c.hash })">
-                  <studio-icon name="eye" class="w-3.5 h-3.5"></studio-icon>
-                </button>
-              </div>
-            </div>
-          </div>
-        </studio-pane>
+        <!-- Card 2: 提交记录列表卡片 (Virtualized Componentized Stream) -->
+        <commit-list
+          :t="t"
+          :filtered-commits="filteredCommits"
+          :filter-date="filterDate"
+          :filter-author="filterAuthor"
+          :author-options="authorOptions"
+          :has-multiple-authors="hasMultipleAuthors"
+          :single-author-name="singleAuthorName"
+          :active-date-preset="activeDatePreset"
+          :is-multi-repo-mode="isMultiRepoMode"
+          :is-refreshing="isRefreshing"
+          :get-repo-display-name="getRepoDisplayName"
+          @update:filter-date="(val) => filterDate = val"
+          @update:filter-author="(val) => filterAuthor = val"
+          @set-date-preset="setDatePreset"
+          @open-detail="openCommitDetail"></commit-list>
       </section>
 
       <!-- Right Split Pane: Editor & Unified Action Toolbar (Componentized) -->
@@ -379,6 +238,10 @@
     <!-- 封装好的组件：LanguageModal 语言切换弹窗 (严格完整闭合标签) -->
     <language-modal :is-open="isLanguageModalOpen" :current-locale="locale" :supported-locales="supportedLocales"
       @close="closeLanguageModal" @select-locale="onSelectLanguage"></language-modal>
+
+    <!-- 封装好的组件：KeyboardShortcutsModal 快捷键指南 (严格完整闭合标签) -->
+    <keyboard-shortcuts-modal :is-open="isShortcutsModalOpen" :t="t"
+      @close="closeShortcutsModal"></keyboard-shortcuts-modal>
 
     <!-- 封装好的组件：CommitDetailModal 提交详情检查器 (严格完整闭合标签) -->
     <commit-detail-modal :is-open="isDetailModalOpen" :commit="activeDetailCommit" @close="closeCommitDetail"
@@ -445,6 +308,9 @@
   <script src="components/CustomSelect.js"></script>
   <script src="components/SegmentedControl.js"></script>
   <script src="components/RepoTagList.js"></script>
+  <script src="components/AppHeader.js"></script>
+  <script src="components/CommitList.js"></script>
+  <script src="components/KeyboardShortcutsModal.js"></script>
   <script src="components/ReportEditor.js"></script>
   <script src="components/ThemeCustomizerPopover.js"></script>
   <script src="components/LanguageModal.js"></script>
