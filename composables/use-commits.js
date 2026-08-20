@@ -76,12 +76,6 @@
       showToast('📋 已复制 Commit 完整日志 Message');
     }
 
-    function copyTeamGitLogCommand() {
-      const cmd = `git log --all --pretty=format:"%h|%an|%ad|%s" --date=short -n 100`;
-      navigator.clipboard.writeText(cmd);
-      showToast('📋 已复制团队 Git Log 导出命令！在终端执行后，将输出内容粘贴进本页面即可导入团队所有人的提交', 'info');
-    }
-
     return {
       filterDate,
       filterAuthor,
@@ -95,8 +89,7 @@
       openCommitDetail,
       closeCommitDetail,
       copyFullSha,
-      copyCommitMsg,
-      copyTeamGitLogCommand
+      copyCommitMsg
     };
   }
 

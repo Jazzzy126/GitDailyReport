@@ -286,7 +286,6 @@
         closeCommitDetail: commits.closeCommitDetail,
         copyFullSha: commits.copyFullSha,
         copyCommitMsg: commits.copyCommitMsg,
-        copyTeamGitLogCommand: commits.copyTeamGitLogCommand,
 
         // Settings
         isSettingsModalOpen: settings.isSettingsModalOpen,
