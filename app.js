@@ -212,6 +212,23 @@
           }
         });
 
+        // 6. Global Paste Git Log Listener
+        window.addEventListener('paste', (e) => {
+          const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+          if (activeTag === 'input' || activeTag === 'textarea' || document.activeElement.isContentEditable) {
+            return;
+          }
+          const text = e.clipboardData ? e.clipboardData.getData('text') : '';
+          if (text && text.trim()) {
+            const parsed = window.GitParser.parseTextLog(text);
+            if (parsed && parsed.length > 0) {
+              e.preventDefault();
+              repos.importCommits(parsed, 'PastedGitLog');
+              toast.showToast(`📋 已通过剪贴板成功快速导入 ${parsed.length} 条提交记录！`);
+            }
+          }
+        });
+
         refreshIcons();
       });
 
@@ -235,8 +252,9 @@
         // Repos
         recentRepos: repos.recentRepos,
         selectedRepoNames: repos.selectedRepoNames,
-        currentRepoBadgeText: repos.currentRepoBadgeText,
+        repoAliases: repos.repoAliases,
         isMultiRepoMode: repos.isMultiRepoMode,
+        currentRepoBadgeText: repos.currentRepoBadgeText,
         mergedCommits: repos.mergedCommits,
         isRefreshing: repos.isRefreshing,
         isDropzoneCollapsed: repos.isDropzoneCollapsed,
@@ -258,6 +276,9 @@
         filterDate: commits.filterDate,
         filterAuthor: commits.filterAuthor,
         authorOptions: commits.authorOptions,
+        authorsList: commits.authorsList,
+        hasMultipleAuthors: commits.hasMultipleAuthors,
+        singleAuthorName: commits.singleAuthorName,
         filteredCommits: commits.filteredCommits,
         activeDetailCommit: commits.activeDetailCommit,
         isDetailModalOpen: commits.isDetailModalOpen,
@@ -265,6 +286,7 @@
         closeCommitDetail: commits.closeCommitDetail,
         copyFullSha: commits.copyFullSha,
         copyCommitMsg: commits.copyCommitMsg,
+        copyTeamGitLogCommand: commits.copyTeamGitLogCommand,
 
         // Settings
         isSettingsModalOpen: settings.isSettingsModalOpen,

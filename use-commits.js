@@ -19,12 +19,18 @@
     const activeDetailCommit = ref(null);
     const isDetailModalOpen = ref(false);
 
+    const authorsList = computed(() => {
+      return Array.from(new Set(mergedCommits.value.map(c => c.author))).filter(Boolean);
+    });
+
+    const hasMultipleAuthors = computed(() => authorsList.value.length > 1);
+    const singleAuthorName = computed(() => (authorsList.value.length === 1 ? authorsList.value[0] : ''));
+
     // Dynamic Author Options from mergedCommits
     const authorOptions = computed(() => {
-      const authors = Array.from(new Set(mergedCommits.value.map(c => c.author))).filter(Boolean);
       return [
         { value: 'all', label: '所有提交人' },
-        ...authors.map(a => ({ value: a, label: a }))
+        ...authorsList.value.map(a => ({ value: a, label: a }))
       ];
     });
 
@@ -70,17 +76,27 @@
       showToast('📋 已复制 Commit 完整日志 Message');
     }
 
+    function copyTeamGitLogCommand() {
+      const cmd = `git log --all --pretty=format:"%h|%an|%ad|%s" --date=short -n 100`;
+      navigator.clipboard.writeText(cmd);
+      showToast('📋 已复制团队 Git Log 导出命令！在终端执行后，将输出内容粘贴进本页面即可导入团队所有人的提交', 'info');
+    }
+
     return {
       filterDate,
       filterAuthor,
       authorOptions,
+      authorsList,
+      hasMultipleAuthors,
+      singleAuthorName,
       filteredCommits,
       activeDetailCommit,
       isDetailModalOpen,
       openCommitDetail,
       closeCommitDetail,
       copyFullSha,
-      copyCommitMsg
+      copyCommitMsg,
+      copyTeamGitLogCommand
     };
   }
 

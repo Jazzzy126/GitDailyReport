@@ -261,7 +261,28 @@ class GitParser {
   }
 
   /**
-   * Read directory handle (including checking logs/HEAD, logs/refs/heads, etc.)
+   * Recursively collect all files under a directory handle
+   */
+  static async readAllFilesFromDirHandle(dirHandle) {
+    const files = [];
+    try {
+      for await (const entry of dirHandle.values()) {
+        if (entry.kind === 'file') {
+          try {
+            const file = await entry.getFile();
+            files.push(file);
+          } catch (e) {}
+        } else if (entry.kind === 'directory') {
+          const subFiles = await this.readAllFilesFromDirHandle(entry);
+          files.push(...subFiles);
+        }
+      }
+    } catch (e) {}
+    return files;
+  }
+
+  /**
+   * Read directory handle (including recursive scanning of logs/HEAD, logs/refs/heads, logs/refs/remotes, etc.)
    */
   static async parseFromDirectoryHandle(dirHandle) {
     let logsContent = '';
@@ -279,26 +300,20 @@ class GitParser {
 
       const targetDir = gitDirHandle || dirHandle;
 
-      // 1. Try targetDir/logs/HEAD
+      // 1. Recursively scan the entire logs directory (HEAD, refs/heads, refs/remotes, etc.)
       try {
         const logsDir = await targetDir.getDirectoryHandle('logs');
-        const headFileHandle = await logsDir.getFileHandle('HEAD');
-        const file = await headFileHandle.getFile();
-        logsContent = await file.text();
-      } catch (err) {
-        // 2. Try targetDir/logs/refs/heads/main or master or SP1.5.1
-        try {
-          const logsDir = await targetDir.getDirectoryHandle('logs');
-          const refsDir = await logsDir.getDirectoryHandle('refs');
-          const headsDir = await refsDir.getDirectoryHandle('heads');
-
-          for await (const entry of headsDir.values()) {
-            if (entry.kind === 'file') {
-              const file = await entry.getFile();
-              logsContent += (await file.text()) + '\n';
+        const allLogFiles = await this.readAllFilesFromDirHandle(logsDir);
+        for (const file of allLogFiles) {
+          try {
+            const text = await file.text();
+            if (text && text.trim()) {
+              logsContent += text + '\n';
             }
-          }
-        } catch (err2) {}
+          } catch (e) {}
+        }
+      } catch (err) {
+        console.warn('[GitParser] 未找到 logs 目录或读取失败，尝试直接查找文件:', err);
       }
 
       if (logsContent) {

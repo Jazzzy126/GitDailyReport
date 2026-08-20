@@ -560,6 +560,28 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   background-color: rgba(38, 38, 48, 0.8);
 }
 
+.studio-btn-subtle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  background-color: var(--surface-sunken);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+}
+.studio-btn-subtle:hover {
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
+  background-color: var(--surface-elevated);
+  transform: translateY(-0.5px);
+}
+.studio-btn-subtle:active {
+  transform: scale(0.98);
+}
+
 /* Modal Overlay & Glass Card Utilities */
 .studio-modal-overlay {
   position: fixed;
