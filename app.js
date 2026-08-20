@@ -50,6 +50,7 @@
       const toast = window.useToast();
       const theme = window.useTheme();
       const motion = window.useMotion ? window.useMotion() : null;
+      const whimsy = window.useWhimsy ? window.useWhimsy() : null;
 
       const repos = window.useRepos({
         showToast: toast.showToast,
@@ -75,7 +76,8 @@
         showLoading,
         hideLoading,
         showToast: toast.showToast,
-        motion
+        motion,
+        whimsy
       });
 
       // Item count options dynamic i18n mapping
@@ -316,7 +318,12 @@
           toast.showToast(t('toast.aiConfigDetected'));
         }
 
-        // 5. Register Global Event Listeners
+        // 5. Whimsy Geek Banner
+        if (whimsy) {
+          whimsy.printConsoleGeekBanner();
+        }
+
+        // 6. Register Global Event Listeners
         document.addEventListener('keydown', onKeyDown);
         document.addEventListener('click', onDocumentClick);
         window.addEventListener('paste', onPaste);
@@ -341,6 +348,12 @@
         openLanguageModal,
         closeLanguageModal,
         onSelectLanguage,
+
+        // Whimsy & Easter Eggs
+        whimsy,
+        handleLogoClick: whimsy ? whimsy.handleLogoClick : () => {},
+        isAchievementModalOpen: whimsy ? whimsy.isAchievementModalOpen : ref(false),
+        closeAchievementModal: whimsy ? whimsy.closeAchievementModal : () => {},
 
         // Loading
         isLoading,

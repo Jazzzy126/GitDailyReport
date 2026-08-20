@@ -81,8 +81,8 @@
         emit('generate');
       }
 
-      function onCopyPlain() {
-        emit('copy-plain');
+      function onCopyPlain(e) {
+        emit('copy-plain', e);
         isPlainCopied.value = true;
         clearTimeout(plainCopyTimer);
         plainCopyTimer = setTimeout(() => {
@@ -90,8 +90,8 @@
         }, 1500);
       }
 
-      function onCopyMd() {
-        emit('copy-md');
+      function onCopyMd(e) {
+        emit('copy-md', e);
         isMdCopied.value = true;
         clearTimeout(mdCopyTimer);
         mdCopyTimer = setTimeout(() => {
@@ -99,8 +99,8 @@
         }, 1500);
       }
 
-      function onCopyHtml() {
-        emit('copy-html');
+      function onCopyHtml(e) {
+        emit('copy-html', e);
         isHtmlCopied.value = true;
         clearTimeout(htmlCopyTimer);
         htmlCopyTimer = setTimeout(() => {

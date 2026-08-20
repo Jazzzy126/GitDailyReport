@@ -6,7 +6,7 @@
  */
 
 (function (window) {
-  function useReport({
+    function useReport({
     filteredCommits,
     filterDate,
     selectedRepoNames,
@@ -15,7 +15,8 @@
     showLoading,
     hideLoading,
     showToast,
-    motion
+    motion,
+    whimsy
   }) {
     const { ref, computed } = window.Vue;
     const i18n = window.useI18n ? window.useI18n() : null;
@@ -191,7 +192,14 @@
         return;
       }
 
-      showLoading(t('report.generatingLoading'));
+      // Start Whimsy dynamic loading quote rotation
+      const quotes = t('whimsy.loadingQuotes') || [t('report.generatingLoading')];
+      if (whimsy && whimsy.startQuoteRotation) {
+        whimsy.startQuoteRotation(quotes, (msg) => showLoading(msg));
+      } else {
+        showLoading(t('report.generatingLoading'));
+      }
+
       try {
         const commitsWithDisplayName = commits.map(c => ({
           ...c,
@@ -199,6 +207,7 @@
         }));
 
         const result = await window.AIService.generateReport(commitsWithDisplayName);
+        if (whimsy && whimsy.stopQuoteRotation) whimsy.stopQuoteRotation();
         hideLoading();
 
         if (motion && motion.runTypewriter) {
@@ -210,14 +219,17 @@
             (curr) => { reportOutput.value = curr; },
             () => {
               isTyping.value = false;
+              if (whimsy && whimsy.triggerConfetti) whimsy.triggerConfetti();
               showToast(t('report.generateSuccess'));
             }
           );
         } else {
           reportOutput.value = result;
+          if (whimsy && whimsy.triggerConfetti) whimsy.triggerConfetti();
           showToast(t('report.generateSuccess'));
         }
       } catch (err) {
+        if (whimsy && whimsy.stopQuoteRotation) whimsy.stopQuoteRotation();
         hideLoading();
         showToast(`❌ ${err.message}`, 'error');
         reportOutput.value = generateStandardReport(commits);
@@ -249,7 +261,7 @@
         .replace(/<code>/g, '<code style="background-color: rgba(0, 102, 255, 0.08); color: #0066FF; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 13px;">');
     }
 
-    async function copyHtml() {
+    async function copyHtml(event) {
       const text = reportOutput.value;
       if (!text || !text.trim()) {
         showToast(t('report.noCommitsWarn'), 'warning');
@@ -258,6 +270,11 @@
 
       const plainText = stripMarkdownToPlain(text);
       const richHtml = generateRichHtml(text);
+      const toastMsg = t('whimsy.copyToastHtml') || t('toast.copySuccess');
+
+      if (whimsy && whimsy.triggerSparkles) {
+        whimsy.triggerSparkles(event ? (event.clientX || event.target) : null);
+      }
 
       try {
         if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
@@ -269,40 +286,46 @@
               'text/plain': textBlob
             })
           ]);
-          showToast(t('toast.copySuccess'));
+          showToast(toastMsg);
           return true;
         } else {
           await navigator.clipboard.writeText(plainText);
-          showToast(t('toast.copySuccess'));
+          showToast(toastMsg);
           return true;
         }
       } catch (err) {
         console.warn('[useReport] Copy rich text error, fallback to plain', err);
         await navigator.clipboard.writeText(plainText);
-        showToast(t('toast.copySuccess'));
+        showToast(toastMsg);
         return true;
       }
     }
 
-    function copyPlain() {
+    function copyPlain(event) {
       const text = reportOutput.value;
       if (!text || !text.trim()) {
         showToast(t('report.noCommitsWarn'), 'warning');
         return;
+      }
+      if (whimsy && whimsy.triggerSparkles) {
+        whimsy.triggerSparkles(event ? (event.clientX || event.target) : null);
       }
       const plainText = stripMarkdownToPlain(text);
       navigator.clipboard.writeText(plainText);
-      showToast(t('toast.copySuccess'));
+      showToast(t('whimsy.copyToastPlain') || t('toast.copySuccess'));
     }
 
-    function copyMd() {
+    function copyMd(event) {
       const text = reportOutput.value;
       if (!text || !text.trim()) {
         showToast(t('report.noCommitsWarn'), 'warning');
         return;
       }
+      if (whimsy && whimsy.triggerSparkles) {
+        whimsy.triggerSparkles(event ? (event.clientX || event.target) : null);
+      }
       navigator.clipboard.writeText(text);
-      showToast(t('toast.copySuccess'));
+      showToast(t('whimsy.copyToastMd') || t('toast.copySuccess'));
     }
 
     return {

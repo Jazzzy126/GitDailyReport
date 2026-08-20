@@ -195,6 +195,24 @@
         repoParsed: '✅ 成功解析项目「{name}」，共 {count} 条提交！',
         copySuccess: '📋 内容已成功复制到剪贴板！',
         languageSwitched: '🌐 语言已切换为：{lang}'
+      },
+      whimsy: {
+        loadingQuotes: [
+          '☕ 正在给 Git 提交记录脱水压榨精华...',
+          '✨ 正在将 10 个 fix: typo 包装成重大架构优化...',
+          '🤖 正在向 AI 翻译官解释什么叫「一行代码写一天」...',
+          '🚀 数字小精灵正在对齐颗粒度与赋能闭环...',
+          '🎨 正在为今日份努力寻找最惊艳的修辞手法...',
+          '☕ 喝口咖啡，今日份高质量战报马上送达...'
+        ],
+        copyToastPlain: '📋 纯文本已送达剪贴板，去惊艳你的 Leader 吧！',
+        copyToastMd: '📝 Markdown 已复制，格式规整得像艺术品！',
+        copyToastHtml: '✨ 精美富文本已就位，直接粘贴即可惊艳全场！',
+        achievementTitle: '🏆 获得隐藏极客称号',
+        achievementName: '【野生代码艺术家】',
+        achievementDesc: '恭喜你！在代码与日报之间保持了最纯粹的好奇心与探索欲。',
+        achievementQuote: '「Talk is cheap, show me the daily report.」',
+        closeAchievement: '低调收下'
       }
     },
 
@@ -377,6 +395,24 @@
         repoParsed: '✅ Successfully parsed repo "{name}" with {count} commits!',
         copySuccess: '📋 Content copied to clipboard successfully!',
         languageSwitched: '🌐 Language switched to: {lang}'
+      },
+      whimsy: {
+        loadingQuotes: [
+          '☕ Extracting pure value from Git commits...',
+          '✨ Packaging 10 "fix: typo" commits into major architecture revamps...',
+          '🤖 Explaining to AI what "spent whole day on 1 line of code" means...',
+          '🚀 Aligning granular synergy and closed-loop empowerment...',
+          '🎨 Searching for the most stunning rhetoric for your daily grind...',
+          '☕ Grab a coffee, your masterpiece report is rendering...'
+        ],
+        copyToastPlain: '📋 Plain text copied! Ready to impress your leader!',
+        copyToastMd: '📝 Markdown copied! Crafted cleanly like a piece of art.',
+        copyToastHtml: '✨ Rich HTML ready! Paste directly into email/chat to shine.',
+        achievementTitle: '🏆 Hidden Geek Title Unlocked',
+        achievementName: '【Wild Code Artist】',
+        achievementDesc: 'Congratulations! You kept pure curiosity and exploration between code and reports.',
+        achievementQuote: '"Talk is cheap, show me the daily report."',
+        closeAchievement: 'Keep It Low-key'
       }
     },
 
@@ -559,6 +595,24 @@
         repoParsed: '✅ リポジトリ「{name}」から {count} 件のコミットを読み込みました！',
         copySuccess: '📋 クリップボードにコピーしました！',
         languageSwitched: '🌐 言語を切り替えました：{lang}'
+      },
+      whimsy: {
+        loadingQuotes: [
+          '☕ コミット履歴から純粋なエッセンスを抽出中...',
+          '✨ 10件の fix: typo を主要アーキテクチャ刷新に昇華中...',
+          '🤖 1行のコードに1日かけた苦労をAIに熱弁中...',
+          '🚀 粒度を揃えてシナジーを最大化しています...',
+          '🎨 本日の努力にふさわしい美しい修辞を探索中...',
+          '☕ コーヒーブレイクをどうぞ、極上の日報がまもなく完成します...'
+        ],
+        copyToastPlain: '📋 テキストをコピーしました！リーダーを驚かせましょう！',
+        copyToastMd: '📝 Markdown をコピー！芸術品のように整った書式です。',
+        copyToastHtml: '✨ リッチテキストをコピー！そのまま貼り付けて完璧な報告に。',
+        achievementTitle: '🏆 隠し称号を獲得',
+        achievementName: '【孤高のコードアーティスト】',
+        achievementDesc: 'おめでとうございます！コードと日報の間に純粋な探求心を保ち続けました。',
+        achievementQuote: '「Talk is cheap, show me the daily report.」',
+        closeAchievement: 'そっと受け取る'
       }
     },
 
@@ -741,6 +795,24 @@
         repoParsed: '✅ "{name}" 저장소에서 {count}개의 커밋을 성공적으로 불러왔습니다!',
         copySuccess: '📋 내용이 클립보드에 복사되었습니다!',
         languageSwitched: '🌐 언어가 변경되었습니다: {lang}'
+      },
+      whimsy: {
+        loadingQuotes: [
+          '☕ Git 커밋 기록에서 핵심 가치만 농축 추출하는 중...',
+          '✨ 10개의 fix: typo 를 중대한 아키텍처 개선으로 승화 중...',
+          '🤖 한 줄 코드에 하루를 쏟은 이유를 AI에게 설명하는 중...',
+          '🚀 업무의 밀도를 맞추고 시너지를 극대화하는 중...',
+          '🎨 오늘의 피땀눈물을 가장 빛나게 해줄 수사를 찾는 중...',
+          '☕ 커피 한 잔 즐기세요, 최고의 업무보고서가 곧 완성됩니다...'
+        ],
+        copyToastPlain: '📋 텍스트 복사 완료! 팀장님을 감동시킬 준비 완료!',
+        copyToastMd: '📝 Markdown 복사 완료! 예술 작품처럼 깔끔한 포맷팅.',
+        copyToastHtml: '✨ 서식 텍스트 복사 완료! 붙여넣기만 하면 완벽한 보고서 완성.',
+        achievementTitle: '🏆 히든 칭호 획득',
+        achievementName: '【야생의 코드 아티스트】',
+        achievementDesc: '축하합니다! 코드와 일일보고 사이에서 순수한 호기심과 탐구심을 지켜내셨습니다.',
+        achievementQuote: '「Talk is cheap, show me the daily report.」',
+        closeAchievement: '조용히 받기'
       }
     }
   };

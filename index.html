@@ -122,10 +122,10 @@
       <div
         class="ios-header h-13 px-4 rounded-2xl flex items-center justify-between shadow-xl backdrop-blur-2xl border border-white/40 dark:border-white/10 transition-all duration-300">
 
-        <!-- Header Left: Logo & Brand Title -->
-        <div class="flex items-center gap-3 shrink-0">
+        <!-- Header Left: Logo & Brand Title (Easter Egg Clicker) -->
+        <div class="flex items-center gap-3 shrink-0 cursor-pointer select-none group" @click="handleLogoClick" title="✨ 点击探索隐藏极客彩蛋">
           <div
-            class="w-8.5 h-8.5 rounded-xl bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center shadow-md shrink-0 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 transition-all duration-200"
+            class="w-8.5 h-8.5 rounded-xl bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center shadow-md shrink-0 group-hover:-translate-y-0.5 group-hover:rotate-6 group-hover:shadow-lg active:scale-90 transition-all duration-200"
             aria-hidden="true">
             <i data-lucide="git-pull-request" class="w-4 h-4 text-[var(--md-sys-color-primary)]"></i>
           </div>
@@ -403,6 +403,26 @@
       :display-name="getRepoDisplayName(activeRepoMenu)" @close="closeRepoMenu" @edit-alias="promptEditAlias"
       @refresh="refreshRepoByHandle" @remove="removeRepo"></repo-action-modal>
 
+    <!-- 趣味极客成就卡片弹窗 (StudioModal) -->
+    <studio-modal :is-open="isAchievementModalOpen" @close="closeAchievementModal" aria-label="极客成就" custom-class="w-auto">
+      <div class="studio-modal-glass achievement-card-glow px-8 py-7 rounded-3xl flex flex-col items-center gap-3.5 max-w-sm text-center border border-[var(--md-sys-color-outline-variant)] shadow-2xl">
+        <div class="w-16 h-16 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-3xl shadow-lg border border-amber-400/30 animate-bounce">
+          🏆
+        </div>
+        <div class="space-y-1">
+          <span class="text-[11px] font-black tracking-widest text-amber-500 uppercase">{{ t('whimsy.achievementTitle') }}</span>
+          <h3 class="font-heading font-black text-lg text-[var(--md-sys-color-on-surface)]">{{ t('whimsy.achievementName') }}</h3>
+          <p class="text-xs text-[var(--md-sys-color-on-surface-variant)] leading-relaxed px-2">{{ t('whimsy.achievementDesc') }}</p>
+        </div>
+        <div class="w-full py-2 px-3 rounded-xl bg-black/5 dark:bg-white/5 border border-[var(--md-sys-color-outline-variant)]">
+          <span class="text-[11px] font-mono italic text-[var(--md-sys-color-primary)]">{{ t('whimsy.achievementQuote') }}</span>
+        </div>
+        <button type="button" @click="closeAchievementModal" class="studio-btn studio-btn-primary w-full mt-2 cursor-pointer">
+          <span>{{ t('whimsy.closeAchievement') }}</span>
+        </button>
+      </div>
+    </studio-modal>
+
   </div>
 
   <!-- Modular Services & Composables -->
@@ -410,6 +430,7 @@
   <script src="services/git-parser.js"></script>
   <script src="services/ai-service.js"></script>
   <script src="composables/use-i18n.js"></script>
+  <script src="composables/use-whimsy.js"></script>
   <script src="composables/use-motion.js"></script>
   <script src="composables/use-toast.js"></script>
   <script src="composables/use-theme.js"></script>
