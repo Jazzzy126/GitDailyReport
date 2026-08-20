@@ -247,6 +247,67 @@
       }
     }
 
+    function generateRichHtml(mdText) {
+      if (!mdText) return '';
+      let rawHtml = '';
+      if (window.marked && typeof window.marked.parse === 'function') {
+        rawHtml = window.marked.parse(mdText);
+      } else {
+        rawHtml = mdText.replace(/\n/g, '<br>');
+      }
+
+      // Inject refined inline styles for Feishu, DingTalk, WeChat, Outlook & Apple Mail
+      return `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; font-size: 14px; line-height: 1.75; color: #1f2328;">
+          ${rawHtml}
+        </div>
+      `
+        .replace(/<h1>/g, '<h1 style="font-size: 18px; font-weight: 800; color: #0066FF; margin: 14px 0 8px 0; border-bottom: 1px solid rgba(0, 102, 255, 0.15); padding-bottom: 4px;">')
+        .replace(/<h2>/g, '<h2 style="font-size: 16px; font-weight: 700; color: #0066FF; margin: 12px 0 6px 0;">')
+        .replace(/<h3>/g, '<h3 style="font-size: 15px; font-weight: 700; color: #0066FF; margin: 10px 0 4px 0;">')
+        .replace(/<p>/g, '<p style="margin: 0 0 8px 0;">')
+        .replace(/<ul>/g, '<ul style="margin: 0 0 10px 0; padding-left: 22px;">')
+        .replace(/<ol>/g, '<ol style="margin: 0 0 10px 0; padding-left: 22px;">')
+        .replace(/<li>/g, '<li style="margin-bottom: 5px;">')
+        .replace(/<strong>/g, '<strong style="color: #0052CC; font-weight: 700;">')
+        .replace(/<code>/g, '<code style="background-color: rgba(0, 102, 255, 0.08); color: #0066FF; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 13px;">');
+    }
+
+    async function copyHtml() {
+      const text = reportOutput.value;
+      if (!text || !text.trim()) {
+        showToast('内容为空，请先点击【生成日报】', 'warning');
+        return false;
+      }
+
+      const plainText = stripMarkdownToPlain(text);
+      const richHtml = generateRichHtml(text);
+
+      try {
+        if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+          const htmlBlob = new Blob([richHtml], { type: 'text/html' });
+          const textBlob = new Blob([plainText], { type: 'text/plain' });
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'text/html': htmlBlob,
+              'text/plain': textBlob
+            })
+          ]);
+          showToast('🎨 已复制富文本 (支持直接粘贴飞书/企微/钉钉)');
+          return true;
+        } else {
+          await navigator.clipboard.writeText(plainText);
+          showToast('📝 当前环境不支持富文本，已降级复制纯文本');
+          return true;
+        }
+      } catch (err) {
+        console.warn('[useReport] 富文本写入剪贴板异常，降级纯文本', err);
+        await navigator.clipboard.writeText(plainText);
+        showToast('📝 已降级复制纯文本');
+        return true;
+      }
+    }
+
     function copyPlain() {
       const text = reportOutput.value;
       if (!text || !text.trim()) {
@@ -274,7 +335,9 @@
       isTyping,
       generateReport,
       copyPlain,
-      copyMd
+      copyMd,
+      copyHtml,
+      generateRichHtml
     };
   }
 

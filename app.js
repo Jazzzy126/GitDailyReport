@@ -339,6 +339,7 @@
         getRepoDisplayName: repos.getRepoDisplayName,
         promptEditAlias: repos.promptEditAlias,
         removeRepo: repos.removeRepo,
+        clearAllRepos: repos.clearAllRepos,
         activeRepoMenu: repos.activeRepoMenu,
         toggleRepoMenu: repos.toggleRepoMenu,
         closeRepoMenu: repos.closeRepoMenu,
@@ -346,6 +347,8 @@
         toggleRepoSelection: repos.toggleRepoSelection,
         toggleSelectAllRepos: repos.toggleSelectAllRepos,
         refreshSelectedRepos: repos.refreshSelectedRepos,
+
+        // Drag & Drop
         isDragOver,
         fileInputRef,
         onDropZoneClick,
@@ -364,6 +367,8 @@
         filteredCommits: commits.filteredCommits,
         activeDetailCommit: commits.activeDetailCommit,
         isDetailModalOpen: commits.isDetailModalOpen,
+        activeDatePreset: commits.activeDatePreset,
+        setDatePreset: commits.setDatePreset,
         openCommitDetail: commits.openCommitDetail,
         closeCommitDetail: commits.closeCommitDetail,
         copyFullSha: commits.copyFullSha,
@@ -393,6 +398,7 @@
         generateReport: report.generateReport,
         copyPlain: report.copyPlain,
         copyMd: report.copyMd,
+        copyHtml: report.copyHtml,
 
         // Toast
         toasts: toast.toasts,
