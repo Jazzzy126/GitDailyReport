@@ -251,7 +251,7 @@
 
           <div class="p-4 flex flex-col flex-1 min-h-0 overflow-hidden">
             <!-- Filter Controls Bar (Clean & Lightweight) -->
-            <div class="mb-3 shrink-0">
+            <div class="mb-3 shrink-0 space-y-2">
               <!-- 多人协作模式：展示日期 + 提交人双下拉筛选 -->
               <div v-if="hasMultipleAuthors" class="grid grid-cols-2 gap-2 items-center">
                 <div class="relative w-full">
@@ -279,6 +279,26 @@
                   </div>
                 </div>
               </div>
+
+              <!-- 极速快捷日期胶囊条 (今天 / 昨天 / 全部) -->
+              <div class="flex items-center gap-1.5 pt-0.5">
+                <button type="button" @click="setDatePreset('today')"
+                  :class="['date-pill-btn', { 'active': activeDatePreset === 'today' }]"
+                  aria-label="快速筛选今日提交">
+                  <span class="w-1.5 h-1.5 rounded-full bg-current opacity-70"></span>
+                  <span>今天</span>
+                </button>
+                <button type="button" @click="setDatePreset('yesterday')"
+                  :class="['date-pill-btn', { 'active': activeDatePreset === 'yesterday' }]"
+                  aria-label="快速筛选昨日提交">
+                  <span>昨天</span>
+                </button>
+                <button type="button" @click="setDatePreset('all')"
+                  :class="['date-pill-btn', { 'active': activeDatePreset === 'all' }]"
+                  aria-label="查看全部提交">
+                  <span>全部</span>
+                </button>
+              </div>
             </div>
 
             <!-- Commit Stream List -->
@@ -296,7 +316,11 @@
               <!-- Streamlined Single Commit Line Items -->
               <div v-for="c in filteredCommits" :key="c.hash + '-' + (c.repoName || '')"
                 @click="openCommitDetail(c)"
-                class="commit-stream-item p-2.5 rounded-xl flex items-center justify-between gap-3 group cursor-pointer">
+                class="commit-stream-item p-2.5 rounded-xl flex items-center justify-between gap-2.5 group cursor-pointer">
+                
+                <!-- Timeline Colored Pulse Dot -->
+                <span :class="['timeline-dot', 'timeline-dot-' + (c.type || 'chore')]" :title="'分类: ' + (c.type || 'chore')"></span>
+
                 <div class="min-w-0 flex-1 space-y-1">
                   <!-- Commit Message Title -->
                   <div class="text-[13px] truncate font-bold leading-snug text-[var(--md-sys-color-on-surface)]" :title="c.message">
@@ -337,7 +361,7 @@
         <report-editor v-model="reportOutput" :is-typing="isTyping" :provider="aiConfig.provider || 'DeepSeek'"
           :word-count="animatedWordCount" :commit-count="filteredCommits.length"
           :templates="reportTemplates" :current-template="aiConfig.templateId"
-          @generate="generateReport" @copy-plain="copyPlain" @copy-md="copyMd"
+          @generate="generateReport" @copy-plain="copyPlain" @copy-md="copyMd" @copy-html="copyHtml"
           @select-template="setTemplate"></report-editor>
       </section>
 

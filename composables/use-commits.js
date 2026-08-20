@@ -78,6 +78,30 @@
       activeDetailCommit.value = null;
     }
 
+    // Quick Date Preset Helpers
+    const activeDatePreset = computed(() => {
+      const today = getLocalDateString();
+      const d = new Date();
+      d.setDate(d.getDate() - 1);
+      const yesterday = getLocalDateString(d);
+      if (!filterDate.value) return 'all';
+      if (filterDate.value === today) return 'today';
+      if (filterDate.value === yesterday) return 'yesterday';
+      return 'custom';
+    });
+
+    function setDatePreset(preset) {
+      if (preset === 'today') {
+        filterDate.value = getLocalDateString();
+      } else if (preset === 'yesterday') {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        filterDate.value = getLocalDateString(d);
+      } else if (preset === 'all') {
+        filterDate.value = '';
+      }
+    }
+
     function copyFullSha() {
       if (!activeDetailCommit.value) return;
       const sha = activeDetailCommit.value.fullHash || activeDetailCommit.value.hash;
@@ -101,6 +125,8 @@
       filteredCommits,
       activeDetailCommit,
       isDetailModalOpen,
+      activeDatePreset,
+      setDatePreset,
       openCommitDetail,
       closeCommitDetail,
       copyFullSha,
