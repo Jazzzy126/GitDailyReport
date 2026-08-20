@@ -4,7 +4,7 @@
  */
 
 (function (window) {
-  const { toRefs, ref, computed, nextTick } = window.Vue;
+  const { toRefs, ref, computed, nextTick, onMounted, onUnmounted } = window.Vue;
 
   const CustomSelect = {
     name: 'CustomSelect',
@@ -42,6 +42,20 @@
         isOpen.value = false;
       }
 
+      function onGlobalClick(e) {
+        if (isOpen.value) {
+          isOpen.value = false;
+        }
+      }
+
+      onMounted(() => {
+        document.addEventListener('click', onGlobalClick);
+      });
+
+      onUnmounted(() => {
+        document.removeEventListener('click', onGlobalClick);
+      });
+
       return {
         modelValue,
         options,
@@ -53,24 +67,24 @@
       };
     },
     template: `
-      <div :class="['custom-select-container w-full', { open: isOpen }]" @click.stop>
-        <button 
-          @click="toggle" 
+      <div :class="['custom-select-container relative w-full', { open: isOpen }]" @click.stop>
+        <button
+          @click="toggle"
           @keydown.down.prevent="isOpen = true"
           @keydown.up.prevent="isOpen = true"
           @keydown.esc="close"
-          class="custom-select-trigger focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]" 
+          class="custom-select-trigger focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)]"
           type="button"
           role="combobox"
           :aria-expanded="isOpen"
           aria-haspopup="listbox"
           :aria-label="placeholder || '请选择选项'">
-          <span class="custom-select-label truncate font-semibold text-xs">{{ currentLabel }}</span>
-          <studio-icon name="chevron-down" :class="['custom-select-chevron transition-transform duration-200', { 'rotate-180': isOpen }]"></studio-icon>
+          <span class="custom-select-label truncate font-semibold text-xs text-[var(--md-sys-color-on-surface)]">{{ currentLabel }}</span>
+          <studio-icon name="chevron-down" :class="['custom-select-chevron w-3.5 h-3.5 opacity-70 transition-transform duration-200', { 'rotate-180': isOpen }]"></studio-icon>
         </button>
-        <div v-show="isOpen" class="custom-select-dropdown w-full animate-fadeIn" role="listbox">
-          <div 
-            v-for="opt in options" 
+        <div v-show="isOpen" class="custom-select-dropdown w-full" role="listbox">
+          <div
+            v-for="opt in options"
             :key="opt.value"
             @click="selectOption(opt.value)"
             @keydown.enter.prevent="selectOption(opt.value)"
@@ -78,9 +92,9 @@
             role="option"
             :aria-selected="modelValue === opt.value"
             tabindex="0"
-            :class="['custom-select-option transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] outline-none', { selected: modelValue === opt.value }]">
-            <span>{{ opt.label }}</span>
-            <studio-icon name="check" class="check-icon"></studio-icon>
+            :class="['custom-select-option focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)] outline-none', { selected: modelValue === opt.value }]">
+            <span class="truncate text-xs font-semibold">{{ opt.label }}</span>
+            <studio-icon v-if="modelValue === opt.value" name="check" class="w-3.5 h-3.5 text-[var(--md-sys-color-primary)] shrink-0"></studio-icon>
           </div>
         </div>
       </div>

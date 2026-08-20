@@ -86,7 +86,7 @@
           @click="selectTab(tab)"
           @keydown="onKeydown($event, idx)"
           :class="[
-            'studio-segmented-item focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]',
+            'studio-segmented-item focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)]',
             { 'is-active': modelValue === (tab.id ?? tab.value) }
           ]">
           <studio-icon v-if="tab.icon" :name="tab.icon" class="w-3.5 h-3.5"></studio-icon>

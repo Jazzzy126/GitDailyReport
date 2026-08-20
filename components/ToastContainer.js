@@ -21,7 +21,7 @@
           <div 
             v-for="t in toasts" 
             :key="t.id" 
-            class="toast-msg flex items-center gap-2 pointer-events-auto shadow-2xl backdrop-blur-2xl border border-white/20">
+            class="toast-msg flex items-center gap-2 pointer-events-auto">
             <span>{{ t.message }}</span>
           </div>
         </transition-group>

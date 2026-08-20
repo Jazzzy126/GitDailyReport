@@ -1,6 +1,7 @@
 /**
  * CommitDetailModal Component
- * iOS Inset Grouped Commit Inspector Modal Overlay with Spring Entrance
+ * Authentic Apple iOS Inset Grouped Commit Metadata Inspector
+ * Powered by unified StudioModal base component
  */
 
 (function (window) {
@@ -10,7 +11,7 @@
     name: 'CommitDetailModal',
     props: {
       isOpen: { type: Boolean, default: false },
-      commit: { type: Object, default: () => null }
+      commit: { type: Object, default: null }
     },
     emits: ['close', 'copy-sha', 'copy-msg'],
     setup(props, { emit }) {
@@ -24,13 +25,13 @@
               if (window.anime) {
                 try {
                   window.anime({
-                    targets: '.commit-modal-box',
+                    targets: '.commit-detail-modal-box',
                     scale: [0.92, 1],
                     opacity: [0, 1],
                     duration: 350,
                     easing: 'easeOutCubic'
                   });
-                } catch (e) { }
+                } catch (e) {}
               }
               if (window.lucide) window.lucide.createIcons();
             });
@@ -49,25 +50,26 @@
       };
     },
     template: `
-      <div
-        v-if="isOpen"
-        @click.self="close"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="commit-modal-title"
-        class="studio-modal-overlay">
-        <div class="commit-modal-box studio-modal-glass w-full max-w-xl p-6 space-y-4 relative max-h-[92vh] overflow-y-auto custom-scrollbar">
+      <transition name="studio-modal">
+        <div
+          v-if="isOpen"
+          @click.self="close"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="commit-modal-title"
+          class="studio-modal-overlay">
+          <div class="commit-detail-modal-box studio-modal-glass w-full max-w-xl p-6 space-y-4 relative max-h-[92vh] overflow-y-auto custom-scrollbar">
           <button
             type="button"
             @click="close"
-            aria-label="关闭提交详情"
+            aria-label="关闭详情"
             class="absolute right-4 top-4 studio-icon-btn text-xs font-bold hover:rotate-90">
             ✕
           </button>
 
-          <!-- Modal Header -->
-          <div class="flex items-center gap-3 border-b border-black/5 dark:border-white/10 pb-3">
-            <div class="w-10 h-10 rounded-2xl bg-[var(--color-brand-subtle)] text-[var(--accent-primary)] flex items-center justify-center shrink-0">
+          <!-- Modal Header (Unified Apple Studio Pro Header Structure) -->
+          <div class="flex items-center gap-3 pr-8 pb-1">
+            <div class="w-10 h-10 rounded-2xl bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-primary)] flex items-center justify-center shrink-0">
               <studio-icon name="git-commit" class="w-5 h-5"></studio-icon>
             </div>
             <div>
@@ -77,19 +79,19 @@
           </div>
 
           <!-- Section 1: Inset Grouped SHA Card -->
-          <div class="p-3.5 ios-input-box rounded-2xl space-y-2.5 text-xs">
+          <div class="p-4 ios-input-box rounded-2xl space-y-2.5 text-xs">
             <div class="flex items-center justify-between border-b border-black/5 dark:border-white/5 pb-2.5">
               <span class="text-xs opacity-50 font-bold uppercase tracking-wider">Commit 40位 Checksum</span>
               <button
                 type="button"
                 @click="$emit('copy-sha')"
                 aria-label="复制 Commit Hash 校验码"
-                class="text-xs text-[var(--accent-primary)] hover:underline font-bold flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] rounded px-1">
+                class="text-xs text-[var(--md-sys-color-primary)] hover:underline font-bold flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)] rounded px-1">
                 <studio-icon name="copy" class="w-3.5 h-3.5"></studio-icon>
                 <span>复制 Hash</span>
               </button>
             </div>
-            <div class="font-mono text-xs font-bold text-[var(--accent-primary)] break-all select-all tabular-nums">
+            <div class="font-mono text-xs font-bold text-[var(--md-sys-color-primary)] break-all select-all tabular-nums">
               {{ commit?.fullHash || commit?.hash || '--' }}
             </div>
           </div>
@@ -114,7 +116,7 @@
 
             <div class="flex items-center justify-between py-2.5">
               <span class="opacity-60 font-medium">规范分类 (Category)</span>
-              <span class="font-bold text-[var(--accent-primary)]">
+              <span class="font-bold text-[var(--md-sys-color-primary)]">
                 {{ commit?.typeInfo ? commit.typeInfo.label : (commit?.type || '--') }}
               </span>
             </div>
@@ -149,7 +151,7 @@
                 type="button"
                 @click="$emit('copy-msg')"
                 aria-label="复制完整 Commit 日志"
-                class="text-xs text-[var(--accent-primary)] hover:underline font-bold flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] rounded px-1">
+                class="text-xs text-[var(--md-sys-color-primary)] hover:underline font-bold flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)] rounded px-1">
                 <studio-icon name="copy" class="w-3.5 h-3.5"></studio-icon>
                 <span>复制日志</span>
               </button>
@@ -162,9 +164,9 @@
           <!-- Section 4: Raw Log Line Expandable Inset Card -->
           <div class="p-3.5 ios-input-box rounded-2xl">
             <details class="group">
-              <summary class="text-xs font-bold opacity-60 cursor-pointer hover:opacity-100 flex items-center justify-between select-none focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] rounded">
+              <summary class="text-xs font-bold opacity-60 cursor-pointer hover:opacity-100 flex items-center justify-between select-none focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)] rounded">
                 <span>查看 100% 原始 Git 日报底层数据 (Raw Log Line)</span>
-                <studio-icon name="chevron-down" class="w-3.5 h-3.5 transition group-open:rotate-180 text-[var(--accent-primary)]"></studio-icon>
+                <studio-icon name="chevron-down" class="w-3.5 h-3.5 transition group-open:rotate-180 text-[var(--md-sys-color-primary)]"></studio-icon>
               </summary>
               <div class="mt-2.5 p-3 rounded-xl font-mono text-xs opacity-80 break-all select-all bg-black/5 dark:bg-white/5 tabular-nums">
                 {{ commit?.rawLine || ('commit ' + (commit?.fullHash || commit?.hash || '')) }}
@@ -178,12 +180,12 @@
               type="button"
               @click="close"
               aria-label="关闭对话框"
-              class="studio-btn studio-btn-primary px-6 focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]">
+              class="studio-btn studio-btn-primary px-6 focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)]">
               确定
             </button>
           </div>
         </div>
-      </div>
+      </transition>
     `
   };
 

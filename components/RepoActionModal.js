@@ -66,75 +66,77 @@
       };
     },
     template: `
-      <div
-        v-if="isOpen"
-        @click.self="close"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="repo-action-modal-title"
-        class="studio-modal-overlay">
-        <div class="repo-action-modal-box studio-modal-glass w-full max-w-sm p-6 space-y-4 shadow-2xl rounded-3xl relative border border-[var(--border)]">
-          <button
-            type="button"
-            @click="close"
-            aria-label="关闭窗口"
-            class="absolute right-4 top-4 studio-icon-btn text-xs font-bold hover:rotate-90">
-            ✕
-          </button>
+      <transition name="studio-modal">
+        <div
+          v-if="isOpen"
+          @click.self="close"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="repo-action-modal-title"
+          class="studio-modal-overlay">
+          <div class="repo-action-modal-box studio-modal-glass w-full max-w-sm p-6 space-y-4 shadow-2xl rounded-3xl relative border border-[var(--md-sys-color-outline-variant)]">
+            <button
+              type="button"
+              @click="close"
+              aria-label="关闭窗口"
+              class="absolute right-4 top-4 studio-icon-btn text-xs font-bold hover:rotate-90">
+              ✕
+            </button>
 
-          <div class="flex items-center gap-3 pr-8">
-            <div class="w-10 h-10 rounded-2xl bg-[var(--color-brand-subtle)] text-[var(--accent-primary)] flex items-center justify-center shrink-0">
-              <studio-icon name="git-branch" class="w-5 h-5"></studio-icon>
-            </div>
-            <div class="min-w-0">
-              <h2 id="repo-action-modal-title" class="font-extrabold text-base font-sans truncate text-[var(--foreground)]">
-                {{ displayName || repoName }}
-              </h2>
-              <div class="text-[10px] font-mono opacity-50 truncate" :title="repoName">
-                {{ repoName }}
+            <div class="flex items-center gap-3 pr-8">
+              <div class="w-10 h-10 rounded-2xl bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-primary)] flex items-center justify-center shrink-0">
+                <studio-icon name="git-branch" class="w-5 h-5"></studio-icon>
+              </div>
+              <div class="min-w-0">
+                <h2 id="repo-action-modal-title" class="font-extrabold text-base font-sans truncate text-[var(--md-sys-color-on-surface)]">
+                  {{ displayName || repoName }}
+                </h2>
+                <div class="text-[10px] font-mono opacity-50 truncate" :title="repoName">
+                  {{ repoName }}
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Inset Grouped Options Card with Concentric Geometry (Outer 16px - Padding 6px = Inner 10px) -->
-          <div class="p-1.5 ios-input-box rounded-2xl space-y-1">
-            <button
-              type="button"
-              @click="onEditAlias"
-              class="w-full px-3.5 py-2.5 rounded-[10px] flex items-center justify-between text-left cursor-pointer font-medium text-xs transition-all duration-150 group hover:bg-[var(--color-brand-subtle)] hover:text-[var(--accent-primary)] text-[var(--foreground)]">
-              <span class="flex items-center gap-2.5">
-                <studio-icon name="edit-3" class="w-4 h-4 opacity-75 text-[var(--accent-primary)] group-hover:opacity-100"></studio-icon>
-                <span>修改显示别名</span>
-              </span>
-              <studio-icon name="chevron-right" class="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></studio-icon>
-            </button>
+            <!-- Inset Grouped Options Card with Concentric Geometry (Outer 16px - Padding 6px = Inner 10px) -->
+            <div class="p-1.5 ios-input-box rounded-2xl space-y-1">
+              <button
+                type="button"
+                @click="onEditAlias"
+                class="w-full px-3.5 py-2.5 rounded-md flex items-center justify-between text-left cursor-pointer font-medium text-xs transition-all duration-150 group hover:bg-[var(--md-sys-color-primary-container)] hover:text-[var(--md-sys-color-primary)] text-[var(--md-sys-color-on-surface)]">
+                <span class="flex items-center gap-2.5">
+                  <studio-icon name="edit-3" class="w-4 h-4 opacity-75 text-[var(--md-sys-color-primary)] group-hover:opacity-100"></studio-icon>
+                  <span>修改显示别名</span>
+                </span>
+                <studio-icon name="chevron-right" class="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></studio-icon>
+              </button>
 
-            <button
-              type="button"
-              @click="onRefresh"
-              class="w-full px-3.5 py-2.5 rounded-[10px] flex items-center justify-between text-left cursor-pointer font-medium text-xs transition-all duration-150 group hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 text-[var(--foreground)]">
-              <span class="flex items-center gap-2.5">
-                <studio-icon name="refresh-cw" class="w-4 h-4 opacity-75 text-emerald-500 group-hover:opacity-100"></studio-icon>
-                <span>重新拉取 Git 日志</span>
-              </span>
-              <studio-icon name="chevron-right" class="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></studio-icon>
-            </button>
+              <button
+                type="button"
+                @click="onRefresh"
+                class="w-full px-3.5 py-2.5 rounded-md flex items-center justify-between text-left cursor-pointer font-medium text-xs transition-all duration-150 group hover:bg-emerald-500/10 hover:text-emerald-600 dark:hover:text-emerald-400 text-[var(--md-sys-color-on-surface)]">
+                <span class="flex items-center gap-2.5">
+                  <studio-icon name="refresh-cw" class="w-4 h-4 opacity-75 text-emerald-500 group-hover:opacity-100"></studio-icon>
+                  <span>重新拉取 Git 日志</span>
+                </span>
+                <studio-icon name="chevron-right" class="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></studio-icon>
+              </button>
 
-            <div class="border-t border-black/5 dark:border-white/5 my-0.5 mx-1"></div>
+              <div class="border-t border-black/5 dark:border-white/5 my-0.5 mx-1"></div>
 
-            <button
-              type="button"
-              @click="onRemove"
-              class="w-full px-3.5 py-2.5 rounded-[10px] flex items-center justify-between text-left cursor-pointer font-medium text-xs transition-all duration-150 group hover:bg-red-500/12 text-red-500 hover:text-red-600 dark:hover:text-red-400">
-              <span class="flex items-center gap-2.5">
-                <studio-icon name="trash-2" class="w-4 h-4 opacity-75 text-red-500 group-hover:opacity-100"></studio-icon>
-                <span>从列表中移除项目</span>
-              </span>
-              <studio-icon name="chevron-right" class="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></studio-icon>
-            </button>
+              <button
+                type="button"
+                @click="onRemove"
+                class="w-full px-3.5 py-2.5 rounded-md flex items-center justify-between text-left cursor-pointer font-medium text-xs transition-all duration-150 group hover:bg-red-500/12 text-red-500 hover:text-red-600 dark:hover:text-red-400">
+                <span class="flex items-center gap-2.5">
+                  <studio-icon name="trash-2" class="w-4 h-4 opacity-75 text-red-500 group-hover:opacity-100"></studio-icon>
+                  <span>从列表中移除项目</span>
+                </span>
+                <studio-icon name="chevron-right" class="w-3.5 h-3.5 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all"></studio-icon>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </transition>
     `
   };
 

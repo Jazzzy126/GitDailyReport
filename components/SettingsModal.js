@@ -1,6 +1,7 @@
 /**
  * SettingsModal Component
  * Authentic Apple iOS Segmented Control Settings Modal with Prompts & AI Parameters
+ * Focused 100% on Business Logic, API Models & Prompt Templates
  */
 
 (function (window) {
@@ -14,62 +15,49 @@
       aiConfig: { type: Object, required: true },
       isTestingConnection: { type: Boolean, default: false },
       itemCountOptions: { type: Array, default: () => [] },
-      providerOptions: { type: Array, default: () => [] }
+      providerOptions: { type: Array, default: () => [] },
+      reportTemplates: { type: Array, default: () => [] }
     },
     emits: [
       'close',
       'switch-tab',
+      'select-template',
       'reset-prompt',
       'save-settings',
       'test-connection',
       'provider-change'
     ],
     setup(props, { emit }) {
-      const { 
-        isOpen, 
-        settingsTab, 
-        aiConfig, 
-        isTestingConnection, 
-        itemCountOptions, 
-        providerOptions 
+      const {
+        isOpen,
+        settingsTab,
+        aiConfig,
+        isTestingConnection,
+        itemCountOptions,
+        providerOptions,
+        reportTemplates
       } = toRefs(props);
-
-      watch(
-        () => props.isOpen,
-        (val) => {
-          if (val) {
-            nextTick(() => {
-              if (window.anime) {
-                try {
-                  window.anime({
-                    targets: '.settings-modal-box',
-                    scale: [0.92, 1],
-                    opacity: [0, 1],
-                    duration: 350,
-                    easing: 'easeOutCubic'
-                  });
-                } catch (e) {}
-              }
-              if (window.lucide) window.lucide.createIcons();
-            });
-          }
-        }
-      );
 
       function close() {
         emit('close');
       }
 
-      function switchTab(tab) {
-        emit('switch-tab', tab);
-        nextTick(() => {
-          if (window.lucide) window.lucide.createIcons();
-        });
-      }
+      watch(
+        () => isOpen.value,
+        (open) => {
+          if (open) {
+            nextTick(() => {
+              if (window.lucide) {
+                window.lucide.createIcons();
+              }
+            });
+          }
+        }
+      );
 
       const tabs = [
-        { id: 'prompt', label: '提示词设置', icon: 'file-text' },
-        { id: 'ai', label: 'AI设置', icon: 'cpu' }
+        { id: 'prompt', label: '提示词模板', icon: 'file-text' },
+        { id: 'ai', label: 'AI 模型设置', icon: 'cpu' }
       ];
 
       return {
@@ -79,164 +67,193 @@
         isTestingConnection,
         itemCountOptions,
         providerOptions,
+        reportTemplates,
         tabs,
-        close,
-        switchTab
+        close
       };
     },
     template: `
-      <div 
-        v-if="isOpen" 
-        @click.self="close"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="settings-modal-title"
-        class="studio-modal-overlay">
-        <div class="settings-modal-box studio-modal-glass w-full max-w-xl p-6 space-y-4 relative max-h-[92vh] overflow-y-auto custom-scrollbar">
-          <button 
-            type="button"
-            @click="close" 
-            aria-label="关闭设置"
-            class="absolute right-4 top-4 studio-icon-btn text-xs font-bold hover:rotate-90">
-            ✕
-          </button>
+      <transition name="studio-modal">
+        <div 
+          v-if="isOpen"
+          @click.self="close"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+          class="studio-modal-overlay">
           
-          <!-- Modal Header (Unified Apple Studio Pro Header Structure) -->
-          <div class="flex items-center gap-3 pr-8 pb-1">
-            <div class="w-10 h-10 rounded-2xl bg-[var(--color-brand-subtle)] text-[var(--accent-primary)] flex items-center justify-center shrink-0">
-              <studio-icon name="settings" class="w-5 h-5"></studio-icon>
-            </div>
-            <div>
-              <h2 id="settings-modal-title" class="font-extrabold text-base font-sans text-[var(--foreground)]">系统参数设置</h2>
-              <span class="text-xs opacity-50 font-medium">Studio Pro Preferences & AI Integration</span>
-            </div>
-          </div>
+          <div class="settings-modal-box studio-modal-glass w-full max-w-xl p-6 space-y-4 relative max-h-[92vh] overflow-y-auto custom-scrollbar">
+            <!-- Close Button -->
+            <button 
+              type="button"
+              @click="close" 
+              aria-label="关闭设置"
+              class="absolute right-4 top-4 studio-icon-btn text-xs font-bold hover:rotate-90">
+              ✕
+            </button>
 
-          <!-- Segmented Control Component (Smooth Sliding Pill) -->
-          <segmented-control :model-value="settingsTab" :tabs="tabs" @update:model-value="switchTab"></segmented-control>
-
-          <!-- Tab Panels Container with Unified Height -->
-          <div class="min-h-[320px]">
-            <!-- Tab 1: Prompt Settings -->
-            <div 
-              v-show="settingsTab === 'prompt'" 
-              role="tabpanel"
-              id="panel-prompt"
-              aria-labelledby="tab-prompt"
-              class="space-y-3 text-xs">
-              <div>
-                <label class="font-bold block mb-1">日报总结生成条数 (Item Count)</label>
-                <custom-select 
-                  v-model="aiConfig.itemCount" 
-                  :options="itemCountOptions"></custom-select>
+            <!-- Header -->
+            <div class="flex items-center gap-3 pr-8 pb-1">
+              <div class="w-10 h-10 rounded-2xl bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-primary)] flex items-center justify-center shrink-0">
+                <studio-icon name="sliders" class="w-5 h-5"></studio-icon>
               </div>
-
               <div>
-                <div class="flex items-center justify-between mb-1.5">
-                  <label for="setting-system-prompt" class="font-bold block text-xs cursor-pointer">自定义 AI 提示词 (System Prompt)</label>
+                <h2 id="modal-title" class="font-extrabold text-base font-sans text-[var(--md-sys-color-on-surface)]">系统参数设置</h2>
+                <span class="text-xs opacity-50 font-medium">配置 AI 服务商、API Key 与日报 Prompt</span>
+              </div>
+            </div>
+
+            <!-- iOS Segmented Control Tabs (Official SegmentedControl Component with Sliding Pill) -->
+            <segmented-control
+              :model-value="settingsTab"
+              :tabs="tabs"
+              @update:model-value="$emit('switch-tab', $event)"></segmented-control>
+
+            <!-- Tab Panels Container with Unified Absolute Equal Height (Eliminates Jitter) -->
+            <div class="h-[340px] text-xs relative overflow-hidden">
+              <!-- Tab 1: Prompt Settings -->
+              <div 
+                v-show="settingsTab === 'prompt'" 
+                id="panel-prompt" 
+                role="tabpanel" 
+                aria-labelledby="tab-prompt"
+                class="h-full flex flex-col justify-between space-y-2.5">
+                <div class="flex items-center justify-between gap-2 flex-wrap shrink-0">
+                  <div class="flex items-center p-0.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10 gap-0.5">
+                    <button
+                      v-for="tpl in reportTemplates"
+                      :key="tpl.id"
+                      type="button"
+                      @click="$emit('select-template', tpl.id)"
+                      :class="[
+                        'px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors',
+                        aiConfig.templateId === tpl.id
+                          ? 'bg-[var(--md-sys-color-primary)] text-white shadow-xs'
+                          : 'text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)]'
+                      ]">
+                      <studio-icon :name="tpl.icon" class="w-3.5 h-3.5"></studio-icon>
+                      <span>{{ tpl.name }}</span>
+                    </button>
+                  </div>
                   <button 
                     type="button"
                     @click="$emit('reset-prompt')" 
-                    aria-label="恢复默认系统提示词"
-                    class="text-xs text-[var(--accent-primary)] hover:underline font-semibold flex items-center gap-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)] rounded px-1">
-                    <studio-icon name="rotate-ccw" class="w-3 h-3"></studio-icon>
-                    <span>恢复默认提示词</span>
+                    class="text-xs text-[var(--md-sys-color-primary)] hover:underline font-bold focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)] rounded px-1 cursor-pointer" 
+                    aria-label="恢复当前模板默认 Prompt">
+                    恢复该模板默认
                   </button>
                 </div>
                 <textarea 
-                  id="setting-system-prompt"
+                  id="system-prompt-textarea"
                   name="systemPrompt"
                   v-model="aiConfig.systemPrompt" 
-                  rows="7" 
-                  class="studio-editor-textarea w-full p-3.5 ios-input-box rounded-2xl text-xs leading-5 font-mono resize-none custom-scrollbar transition" 
-                  placeholder="在此配置自定义 AI 提示词…"></textarea>
-                <p class="text-xs opacity-60 mt-1.5 leading-relaxed flex items-center gap-1">
-                  <studio-icon name="info" class="w-3.5 h-3.5 text-[var(--accent-primary)] shrink-0"></studio-icon>
-                  <span><strong>变量说明</strong>：在提示词中使用 <code class="studio-badge-pill font-mono font-semibold">{item_count}</code> 可动态代表上方选中的生成条数。</span>
-                </p>
-              </div>
-            </div>
-
-            <!-- Tab 2: AI Provider & API Key Settings -->
-            <div 
-              v-show="settingsTab === 'ai'" 
-              role="tabpanel"
-              id="panel-ai"
-              aria-labelledby="tab-ai"
-              class="space-y-3.5 text-xs">
-              <div>
-                <label class="font-bold block mb-1">服务提供商 (Provider)</label>
-                <custom-select 
-                  v-model="aiConfig.provider" 
-                  :options="providerOptions" 
-                  @change="$emit('provider-change', $event)"></custom-select>
+                  aria-label="AI 系统提示词模板"
+                  class="studio-editor-textarea w-full flex-1 p-3.5 ios-input-box rounded-2xl resize-none text-xs font-mono select-text" 
+                  placeholder="请输入 Prompt 模板..."></textarea>
+                <div class="text-[11px] opacity-60 font-mono shrink-0">
+                  可用动态占位符：{item_count} 或 {items}（生成条数）、{date}（今日日期）、{commits}（Git 提交日志列表）
+                </div>
               </div>
 
-              <div class="grid grid-cols-2 gap-2.5">
-                <div>
-                  <label for="setting-api-key" class="font-bold block mb-1 cursor-pointer">API Key</label>
+              <!-- Tab 2: AI Engine Settings -->
+              <div 
+                v-show="settingsTab === 'ai'" 
+                id="panel-ai" 
+                role="tabpanel" 
+                aria-labelledby="tab-ai"
+                class="h-full flex flex-col justify-between space-y-2.5">
+                <div class="grid grid-cols-2 gap-3 shrink-0">
+                  <div class="space-y-1">
+                    <label for="ai-provider-select" class="block font-semibold opacity-75">AI 服务商</label>
+                    <custom-select 
+                      id="ai-provider-select"
+                      v-model="aiConfig.provider" 
+                      :options="providerOptions" 
+                      @change="$emit('provider-change', $event)" 
+                      placeholder="选择 AI 服务商"></custom-select>
+                  </div>
+                  <div class="space-y-1">
+                    <label for="ai-item-count-select" class="block font-semibold opacity-75">默认生成条目数</label>
+                    <custom-select 
+                      id="ai-item-count-select"
+                      v-model="aiConfig.itemCount" 
+                      :options="itemCountOptions" 
+                      placeholder="选择条目数"></custom-select>
+                  </div>
+                </div>
+
+                <div class="space-y-1 shrink-0">
+                  <label for="ai-base-url-input" class="block font-semibold opacity-75">API Base URL</label>
                   <input 
-                    id="setting-api-key"
+                    id="ai-base-url-input"
+                    name="baseUrl"
+                    type="text" 
+                    v-model="aiConfig.baseUrl" 
+                    aria-label="API Base URL 地址"
+                    class="ios-form-control ios-input-box rounded-2xl text-xs font-mono select-text" 
+                    placeholder="https://api.deepseek.com/v1">
+                </div>
+
+                <div class="space-y-1 shrink-0">
+                  <label for="ai-api-key-input" class="block font-semibold opacity-75">API Key</label>
+                  <input 
+                    id="ai-api-key-input"
                     name="apiKey"
                     type="password" 
-                    autocomplete="off"
-                    spellcheck="false"
                     v-model="aiConfig.apiKey" 
-                    class="w-full p-2.5 ios-input-box rounded-xl font-mono text-xs transition" 
-                    placeholder="sk-…">
+                    aria-label="API 密钥"
+                    class="ios-form-control ios-input-box rounded-2xl text-xs font-mono select-text" 
+                    placeholder="sk-...">
                 </div>
 
-                <div>
-                  <label for="setting-model" class="font-bold block mb-1 cursor-pointer">Model 模型名称</label>
+                <div class="space-y-1 shrink-0">
+                  <label for="ai-model-input" class="block font-semibold opacity-75">模型名称 (Model)</label>
                   <input 
-                    id="setting-model"
-                    name="modelName"
+                    id="ai-model-input"
+                    name="model"
                     type="text" 
-                    autocomplete="off"
-                    spellcheck="false"
                     v-model="aiConfig.model" 
-                    class="w-full p-2.5 ios-input-box rounded-xl font-mono text-xs transition" 
+                    aria-label="大语言模型名称"
+                    class="ios-form-control ios-input-box rounded-2xl text-xs font-mono select-text" 
                     placeholder="deepseek-chat">
                 </div>
-              </div>
 
-              <div>
-                <label for="setting-base-url" class="font-bold block mb-1 cursor-pointer">Base URL (接口地址)</label>
-                <input 
-                  id="setting-base-url"
-                  name="baseUrl"
-                  type="url" 
-                  autocomplete="off"
-                  spellcheck="false"
-                  v-model="aiConfig.baseUrl" 
-                  class="w-full p-2.5 ios-input-box rounded-xl font-mono text-xs transition" 
-                  placeholder="https://api.deepseek.com/v1">
-              </div>
-
-              <div class="pt-1.5">
-                <button 
-                  type="button" 
-                  @click="$emit('test-connection')" 
-                  :disabled="isTestingConnection"
-                  class="ios-btn w-full py-2.5 ios-input-box rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-[var(--color-brand-subtle)] text-[var(--accent-primary)] transition cursor-pointer disabled:opacity-70 focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]">
-                  <studio-icon name="zap" class="w-3.5 h-3.5"></studio-icon>
-                  <span>{{ isTestingConnection ? '测试中…' : '测试连通性' }}</span>
-                </button>
+                <!-- Connection Test Action Row -->
+                <div class="pt-2 flex items-center justify-between border-t border-black/5 dark:border-white/10 shrink-0">
+                  <span class="text-[11px] opacity-60">配置完成后可先验证 API 接口连通状态</span>
+                  <button 
+                    type="button"
+                    @click="$emit('test-connection')" 
+                    :disabled="isTestingConnection || !aiConfig.apiKey" 
+                    class="studio-btn studio-btn-secondary px-3 py-1.5 text-xs font-bold rounded-xl disabled:opacity-40 flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)] cursor-pointer" 
+                    aria-label="测试 API 接口连通性">
+                    <studio-icon :name="isTestingConnection ? 'loader-2' : 'activity'" :class="['w-3.5 h-3.5', { 'animate-spin': isTestingConnection }]"></studio-icon>
+                    <span>{{ isTestingConnection ? '正在测试连通中…' : '测试 API 连通性' }}</span>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Save Footer -->
-          <div class="flex justify-end pt-3 border-t border-black/5 dark:border-white/10">
-            <button 
-              type="button"
-              @click="$emit('save-settings')" 
-              class="studio-btn studio-btn-primary px-5 focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]">
-              保存配置
-            </button>
+            <!-- Footer Action Row -->
+            <div class="pt-3 flex items-center justify-end gap-2 border-t border-black/5 dark:border-white/10">
+              <button 
+                type="button"
+                @click="close" 
+                class="studio-btn studio-btn-secondary px-4 py-1.5 rounded-xl cursor-pointer" 
+                aria-label="取消关闭设置弹窗">
+                取消
+              </button>
+              <button 
+                type="button"
+                @click="$emit('save-settings')" 
+                class="studio-btn studio-btn-primary px-5 py-1.5 rounded-xl font-bold shadow-xs cursor-pointer" 
+                aria-label="保存设置">
+                保存配置
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </transition>
     `
   };
 
