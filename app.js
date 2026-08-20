@@ -287,7 +287,6 @@
         // Commits
         filterDate: commits.filterDate,
         filterAuthor: commits.filterAuthor,
-        totalCommitsCount: commits.totalCommitsCount,
         authorOptions: commits.authorOptions,
         authorsList: commits.authorsList,
         hasMultipleAuthors: commits.hasMultipleAuthors,
@@ -344,6 +343,7 @@
   if (window.SettingsModal) app.component('SettingsModal', window.SettingsModal);
   if (window.RepoActionModal) app.component('RepoActionModal', window.RepoActionModal);
   if (window.ToastContainer) app.component('ToastContainer', window.ToastContainer);
+  if (window.StudioModal) app.component('StudioModal', window.StudioModal);
   if (window.LoadingOverlay) app.component('LoadingOverlay', window.LoadingOverlay);
 
   app.mount('#app');

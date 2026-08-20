@@ -19,8 +19,6 @@
     const activeDetailCommit = ref(null);
     const isDetailModalOpen = ref(false);
 
-    const totalCommitsCount = computed(() => (mergedCommits.value ? mergedCommits.value.length : 0));
-
     const authorsList = computed(() => {
       return Array.from(new Set((mergedCommits.value || []).map(c => c.author))).filter(Boolean);
     });
@@ -81,7 +79,6 @@
     return {
       filterDate,
       filterAuthor,
-      totalCommitsCount,
       authorOptions,
       authorsList,
       hasMultipleAuthors,

@@ -74,7 +74,7 @@
                 aria-label="生成日报">
                 <studio-icon name="sparkles" class="w-4 h-4 text-amber-300 animate-pulse"></studio-icon>
                 <span class="font-heading font-black">
-                  {{ isTyping ? '正在流式撰写中…' : ('一键生成日报 (' + commitCount + ' 条 Commit)') }}
+                  {{ isTyping ? '正在流式撰写中…' : '一键生成工作日报' }}
                 </span>
               </button>
             </div>
