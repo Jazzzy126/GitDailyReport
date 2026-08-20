@@ -6,16 +6,56 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Git 日报生成器 | Strict 4-Point Grid Studio</title>
 
-  <!-- Anti-FOUC Synchronous 3-State Theme Script -->
+  <!-- Anti-FOUC Synchronous 3-State Theme & Custom Appearance Script -->
   <script>
     (function () {
       try {
         var mode = localStorage.getItem('git_daily_report_ios_theme_mode') || 'system';
         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        if (mode === 'dark' || (mode === 'system' && prefersDark)) {
+        var isDark = mode === 'dark' || (mode === 'system' && prefersDark);
+        if (isDark) {
           document.documentElement.classList.add('dark');
         } else {
           document.documentElement.classList.remove('dark');
+        }
+
+        var customConfigRaw = localStorage.getItem('git_daily_report_theme_custom_config');
+        if (customConfigRaw) {
+          var cfg = JSON.parse(customConfigRaw);
+          var root = document.documentElement;
+          var colorMap = {
+            blue: { hex: '#0066FF', light: '#0A84FF', deep: '#0052CC' },
+            purple: { hex: '#8B5CF6', light: '#A78BFA', deep: '#7C3AED' },
+            emerald: { hex: '#10B981', light: '#34D399', deep: '#059669' },
+            rose: { hex: '#EC4899', light: '#F472B6', deep: '#DB2777' },
+            amber: { hex: '#F59E0B', light: '#FBBF24', deep: '#D97706' }
+          };
+          var c = (cfg.colorId && colorMap[cfg.colorId]) || { hex: cfg.customHex || '#0066FF', light: cfg.customHex || '#0066FF', deep: cfg.customHex || '#0066FF' };
+          var activePrimary = isDark ? c.light : c.hex;
+          var activePrimaryDark = isDark ? c.hex : c.deep;
+          root.style.setProperty('--md-sys-color-primary', activePrimary);
+          root.style.setProperty('--md-sys-color-on-primary', '#ffffff');
+          root.style.setProperty('--md-sys-color-primary-light', c.light);
+          root.style.setProperty('--md-sys-color-primary-dark', activePrimaryDark);
+
+          var radiusMap = {
+            sharp: { extraLarge: '0px', large: '0px', medium: '0px', small: '0px', full: '0px' },
+            compact: { extraLarge: '10px', large: '8px', medium: '6px', small: '4px', full: '4px' },
+            standard: { extraLarge: '16px', large: '12px', medium: '8px', small: '6px', full: '9999px' },
+            bento: { extraLarge: '20px', large: '14px', medium: '10px', small: '6px', full: '9999px' }
+          };
+          var rad = radiusMap[cfg.radiusId] || radiusMap.bento;
+          root.style.setProperty('--md-sys-shape-corner-extra-large', rad.extraLarge);
+          root.style.setProperty('--md-sys-shape-corner-large', rad.large);
+          root.style.setProperty('--md-sys-shape-corner-medium', rad.medium);
+          root.style.setProperty('--md-sys-shape-corner-small', rad.small);
+          root.style.setProperty('--md-sys-shape-corner-full', rad.full);
+
+          if (cfg.glassId === 'opaque') {
+            root.style.setProperty('--md-sys-state-glass-blur', '0px');
+          } else if (cfg.glassId === 'heavy') {
+            root.style.setProperty('--md-sys-state-glass-blur', '40px');
+          }
         }
       } catch (e) { }
     })();
@@ -48,11 +88,11 @@
 </head>
 
 <body
-  class="min-h-full antialiased flex flex-col select-none transition-colors duration-300 relative overflow-x-hidden">
+  class="h-full lg:h-screen antialiased flex flex-col select-none transition-colors duration-300 relative lg:overflow-hidden">
 
   <!-- Skip link for keyboard/screen-reader navigation -->
   <a href="#main-content"
-    class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-[var(--color-brand-500)] focus:text-white focus:font-bold focus:rounded-xl focus:shadow-2xl focus:outline-none">
+    class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2 focus:bg-[var(--md-sys-color-primary)] focus:text-white focus:font-bold focus:rounded-xl focus:shadow-2xl focus:outline-none">
     跳至主要内容
   </a>
 
@@ -63,13 +103,13 @@
 
   <!-- Ambient Decorative Lighting Orbs (Frontend Aesthetics Spatial Depth) -->
   <div
-    class="fixed top-[-10%] right-[-5%] w-[500px] h-[500px] bg-[var(--color-brand-500)]/12 rounded-full blur-[120px] pointer-events-none -z-10"
+    class="fixed top-[-10%] right-[-5%] w-[500px] h-[500px] bg-[var(--md-sys-color-primary)]/12 rounded-full blur-[120px] pointer-events-none -z-10"
     aria-hidden="true"></div>
   <div
     class="fixed bottom-[-10%] left-[-5%] w-[450px] h-[450px] bg-purple-500/10 rounded-full blur-[100px] pointer-events-none -z-10"
     aria-hidden="true"></div>
 
-  <div id="app" class="min-h-full flex flex-col flex-1 relative z-10" v-cloak>
+  <div id="app" class="h-full flex flex-col flex-1 relative z-10 lg:overflow-hidden" v-cloak>
 
     <!-- Floating Liquid Glass Header Navbar -->
     <header class="w-full max-w-[1536px] mx-auto px-3 pt-3 shrink-0 z-40 sticky top-0">
@@ -81,28 +121,48 @@
           <div
             class="w-8.5 h-8.5 rounded-xl bg-zinc-900 text-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 flex items-center justify-center shadow-md shrink-0 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 transition-all duration-200"
             aria-hidden="true">
-            <i data-lucide="git-pull-request" class="w-4 h-4 text-[var(--accent-primary)]"></i>
+            <i data-lucide="git-pull-request" class="w-4 h-4 text-[var(--md-sys-color-primary)]"></i>
           </div>
           <div class="flex items-center gap-2.5">
             <span class="font-heading font-black text-sm sm:text-base tracking-tight truncate">Git 日报生成器</span>
             <span class="hidden sm:inline-flex studio-badge-pill font-mono">
-              <span class="w-1.5 h-1.5 rounded-full bg-[var(--accent-primary)] animate-pulse" aria-hidden="true"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-[var(--md-sys-color-primary)] animate-pulse" aria-hidden="true"></span>
               Studio Pro
             </span>
           </div>
         </div>
 
-        <!-- Header Right: Theme Toggle & Settings Button -->
-        <div class="flex items-center gap-2 shrink-0">
-          <button type="button" @click="toggleTheme"
-            class="studio-icon-btn focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]" :title="themeTitle"
-            :aria-label="themeTitle">
-            <studio-icon :name="themeIcon" :class="['w-4 h-4', themeColorClass]"></studio-icon>
+        <!-- Header Right: Theme Popover & Settings Button -->
+        <div class="flex items-center gap-2 shrink-0 relative">
+          <!-- Theme Customizer Trigger Button -->
+          <button type="button" @click.stop="toggleThemePopover"
+            class="studio-icon-btn focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)] relative"
+            title="外观与个性化偏好"
+            aria-label="外观与个性化偏好"
+            :aria-expanded="isThemePopoverOpen">
+            <studio-icon name="palette" :class="['w-4 h-4', themeColorClass]"></studio-icon>
           </button>
 
+          <!-- Floating Theme Customizer Popover -->
+          <theme-customizer-popover
+            :is-open="isThemePopoverOpen"
+            :theme-mode="themeMode"
+            :theme-custom-config="customThemeConfig"
+            :color-presets="colorPresets"
+            :radius-presets="radiusPresets"
+            :glass-presets="glassPresets"
+            @close="closeThemePopover"
+            @set-theme-mode="setThemeMode"
+            @set-color-preset="setColorPreset"
+            @set-radius-preset="setRadiusPreset"
+            @set-glass-preset="setGlassPreset"
+            @reset-theme-custom="resetCustomConfig"></theme-customizer-popover>
+
+          <!-- System Settings Modal Trigger -->
           <button type="button" @click="openSettingsModal('prompt')"
-            class="studio-icon-btn focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]" title="系统设置"
-            aria-label="系统设置">
+            class="studio-icon-btn focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)]" 
+            title="系统与 AI 设置 (快捷键：Ctrl/Cmd + ,)"
+            aria-label="系统与 AI 设置">
             <i data-lucide="settings" class="w-4 h-4 opacity-80" aria-hidden="true"></i>
           </button>
         </div>
@@ -126,7 +186,7 @@
                 :title="isDropzoneCollapsed ? '展开导入拖拽框' : '收起导入框'"
                 :aria-label="isDropzoneCollapsed ? '展开导入框' : '收起导入框'">
                 <studio-icon :name="isDropzoneCollapsed ? 'folder-plus' : 'chevron-up'"
-                  class="w-3 h-3 text-[var(--accent-primary)]"></studio-icon>
+                  class="w-3 h-3 text-[var(--md-sys-color-primary)]"></studio-icon>
                 <span class="font-bold">{{ isDropzoneCollapsed ? '导入新项目' : '收起' }}</span>
               </button>
 
@@ -135,7 +195,7 @@
                 class="studio-badge-btn"
                 title="一键刷新读取本地最新提交 (支持切回窗口自动同步)" aria-label="一键刷新读取本地最新提交">
                 <studio-icon name="rotate-cw"
-                  :class="['w-3 h-3 text-[var(--accent-primary)]', { 'animate-spin': isRefreshing }]"></studio-icon>
+                  :class="['w-3 h-3 text-[var(--md-sys-color-primary)]', { 'animate-spin': isRefreshing }]"></studio-icon>
                 <span class="font-bold">{{ isRefreshing ? '同步中…' : '刷新' }}</span>
               </button>
 
@@ -146,16 +206,16 @@
             </div>
           </template>
 
-          <div class="p-3.5 space-y-3">
+          <div class="p-4 space-y-3">
             <!-- Direct Folder Drop Zone (Collapsible) -->
             <div v-show="!isDropzoneCollapsed" @click="onDropZoneClick" @keydown.enter.prevent="onDropZoneClick"
               @keydown.space.prevent="onDropZoneClick" @dragover="onDragOver" @dragleave="onDragLeave" @drop="onDrop"
               role="button" tabindex="0" aria-label="点击或拖拽上传 Git 项目文件夹"
-              :class="['drop-zone-box ios-press-action rounded-2xl p-4 text-center cursor-pointer transition-all duration-200 group hover:shadow-md focus-visible:ring-2 focus-visible:ring-[var(--accent-primary)]', { 'border-[var(--accent-primary)] bg-[var(--color-brand-subtle)] scale-[0.99]': isDragOver }]">
+              :class="['drop-zone-box ios-press-action rounded-2xl p-4 text-center cursor-pointer transition-all duration-200 group hover:shadow-md focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)]', { 'border-[var(--md-sys-color-primary)] bg-[var(--md-sys-color-primary-container)] scale-[0.99]': isDragOver }]">
               <div
-                class="flex items-center justify-center gap-2.5 text-xs font-black group-hover:text-[var(--accent-primary)] transition">
+                class="flex items-center justify-center gap-2.5 text-xs font-black group-hover:text-[var(--md-sys-color-primary)] transition">
                 <div
-                  class="w-7 h-7 rounded-xl bg-[var(--color-brand-subtle)] text-[var(--accent-primary)] flex items-center justify-center group-hover:scale-110 transition">
+                  class="w-7 h-7 rounded-xl bg-[var(--md-sys-color-primary-container)] text-[var(--md-sys-color-primary)] flex items-center justify-center group-hover:scale-110 transition">
                   <studio-icon name="upload-cloud" class="w-4 h-4"></studio-icon>
                 </div>
                 <span>点击或拖拽 Git 项目文件夹</span>
@@ -178,12 +238,12 @@
         <studio-pane title="Git 提交记录" icon="git-commit" custom-class="flex-1 min-h-0">
           <template #header-right>
             <div class="studio-badge-pill tabular-nums font-mono">
-              <studio-icon name="git-commit" class="w-3 h-3 text-[var(--accent-primary)]"></studio-icon>
+              <studio-icon name="git-commit" class="w-3 h-3 text-[var(--md-sys-color-primary)]"></studio-icon>
               <span>{{ filteredCommits.length }} 条提交</span>
             </div>
           </template>
 
-          <div class="p-3.5 flex flex-col flex-1 min-h-0 overflow-hidden">
+          <div class="p-4 flex flex-col flex-1 min-h-0 overflow-hidden">
             <!-- Filter Controls Bar (Clean & Lightweight) -->
             <div class="mb-3 shrink-0">
               <!-- 多人协作模式：展示日期 + 提交人双下拉筛选 -->
@@ -208,7 +268,7 @@
                 <div v-if="singleAuthorName" class="flex items-center gap-1.5 shrink-0">
                   <div class="studio-badge-pill text-[11px] py-1.5 px-2.5 max-w-[120px] truncate"
                     :title="'当前作者: ' + singleAuthorName">
-                    <studio-icon name="user" class="w-3 h-3 shrink-0 text-[var(--accent-primary)]"></studio-icon>
+                    <studio-icon name="user" class="w-3 h-3 shrink-0 text-[var(--md-sys-color-primary)]"></studio-icon>
                     <span class="truncate">{{ singleAuthorName }}</span>
                   </div>
                 </div>
@@ -220,8 +280,8 @@
               class="max-h-96 lg:max-h-none flex-1 min-h-0 overflow-y-auto space-y-2 pr-1.5 custom-scrollbar">
               <div v-if="filteredCommits.length === 0" class="text-center opacity-70 text-xs py-8 space-y-3">
                 <studio-icon name="folder-open"
-                  class="w-8 h-8 mx-auto opacity-60 text-[var(--accent-primary)]"></studio-icon>
-                <div class="font-heading font-bold text-sm text-[var(--foreground)]">暂无提交记录</div>
+                  class="w-8 h-8 mx-auto opacity-60 text-[var(--md-sys-color-primary)]"></studio-icon>
+                <div class="font-heading font-bold text-sm text-[var(--md-sys-color-on-surface)]">暂无提交记录</div>
                 <div class="text-xs opacity-70 max-w-xs mx-auto leading-relaxed">
                   请拖拽本地 Git 项目文件夹到上方区域以加载提交记录
                 </div>
@@ -233,7 +293,7 @@
                 class="commit-stream-item p-2.5 rounded-xl flex items-center justify-between gap-3 group cursor-pointer">
                 <div class="min-w-0 flex-1 space-y-1">
                   <!-- Commit Message Title -->
-                  <div class="text-[13px] truncate font-bold leading-snug text-[var(--foreground)]" :title="c.message">
+                  <div class="text-[13px] truncate font-bold leading-snug text-[var(--md-sys-color-on-surface)]" :title="c.message">
                     {{ c.message }}
                   </div>
 
@@ -269,8 +329,10 @@
       <section
         class="col-span-12 lg:col-span-8 xl:col-span-8 flex flex-col h-auto min-h-[460px] lg:h-full lg:min-h-0 overflow-hidden">
         <report-editor v-model="reportOutput" :is-typing="isTyping" :provider="aiConfig.provider || 'DeepSeek'"
-          :word-count="animatedWordCount" :commit-count="filteredCommits.length" @generate="generateReport"
-          @copy-plain="copyPlain" @copy-md="copyMd"></report-editor>
+          :word-count="animatedWordCount" :commit-count="filteredCommits.length"
+          :templates="reportTemplates" :current-template="aiConfig.templateId"
+          @generate="generateReport" @copy-plain="copyPlain" @copy-md="copyMd"
+          @select-template="setTemplate"></report-editor>
       </section>
 
     </main>
@@ -282,9 +344,10 @@
     <!-- 封装好的组件：SettingsModal 系统参数设置弹窗 (严格完整闭合标签) -->
     <settings-modal :is-open="isSettingsModalOpen" :settings-tab="settingsTab" :ai-config="aiConfig"
       :is-testing-connection="isTestingConnection" :item-count-options="itemCountOptions"
-      :provider-options="providerOptions" @close="closeSettingsModal" @switch-tab="switchSettingsTab"
-      @reset-prompt="resetDefaultPrompt" @save-settings="saveSettings" @test-connection="testConnection"
-      @provider-change="onProviderChange"></settings-modal>
+      :provider-options="providerOptions" :report-templates="reportTemplates"
+      @close="closeSettingsModal" @select-template="setTemplate"
+      @switch-tab="switchSettingsTab" @reset-prompt="resetDefaultPrompt" @save-settings="saveSettings"
+      @test-connection="testConnection" @provider-change="onProviderChange"></settings-modal>
 
     <!-- 封装好的组件：LoadingOverlay 全局加载遮罩 (严格完整闭合标签) -->
     <loading-overlay :is-loading="isLoading" :message="loadingMessage"></loading-overlay>
@@ -300,6 +363,7 @@
   </div>
 
   <!-- Modular Services & Composables -->
+  <script src="services/db-storage.js"></script>
   <script src="services/git-parser.js"></script>
   <script src="services/ai-service.js"></script>
   <script src="composables/use-motion.js"></script>
@@ -317,6 +381,7 @@
   <script src="components/SegmentedControl.js"></script>
   <script src="components/RepoTagList.js"></script>
   <script src="components/ReportEditor.js"></script>
+  <script src="components/ThemeCustomizerPopover.js"></script>
   <script src="components/CommitDetailModal.js"></script>
   <script src="components/SettingsModal.js"></script>
   <script src="components/RepoActionModal.js"></script>

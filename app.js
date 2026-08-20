@@ -1,11 +1,11 @@
 /**
  * Main Application Entry Point
  * Vue 3 Root App mounting, Global Component Registration & Composition API integration
- * Fully equipped with Apple-Grade Animation Engine & Staggered Micro-interactions
+ * Fully equipped with Apple-Grade Animation Engine, Debounced Render & Event Lifecycle Cleanup
  */
 
 (function (window) {
-  const { createApp, ref, computed, onMounted, watch, nextTick } = window.Vue;
+  const { createApp, ref, onMounted, onUnmounted, watch, nextTick } = window.Vue;
 
   const App = {
     setup() {
@@ -22,9 +22,13 @@
         isLoading.value = false;
       }
 
-      // 2. Lucide Icons Refresher
+      // 2. Lucide Icons Debounced Refresher
+      let iconRefreshScheduled = false;
       function refreshIcons() {
+        if (iconRefreshScheduled) return;
+        iconRefreshScheduled = true;
         nextTick(() => {
+          iconRefreshScheduled = false;
           if (window.lucide && typeof window.lucide.createIcons === 'function') {
             window.lucide.createIcons();
           }
@@ -83,8 +87,8 @@
       const isDragOver = ref(false);
       const fileInputRef = ref(null);
 
-      function onDropZoneClick(e) {
-        repos.handleFolderSelect().then(handled => {
+      function onDropZoneClick() {
+        repos.handleFolderSelect().then((handled) => {
           if (!handled && fileInputRef.value) {
             fileInputRef.value.click();
           }
@@ -138,7 +142,7 @@
         }
       );
 
-      // Staggered Entrance Animation for Main Studio Panes Only
+      // Staggered Entrance Animation for Main Studio Panes
       function playEntranceAnimation() {
         if (window.anime) {
           window.anime({
@@ -160,7 +164,7 @@
         }
       );
 
-      // Icons update watcher
+      // Icons update watcher (batching)
       watch(
         [
           () => theme.themeMode.value,
@@ -176,6 +180,81 @@
         },
         { flush: 'post' }
       );
+
+      // Theme Customizer Popover state
+      const isThemePopoverOpen = ref(false);
+
+      function toggleThemePopover(e) {
+        if (e) e.stopPropagation();
+        isThemePopoverOpen.value = !isThemePopoverOpen.value;
+      }
+
+      function closeThemePopover() {
+        isThemePopoverOpen.value = false;
+      }
+
+      function setThemeMode(mode) {
+        theme.setThemeMode(mode);
+      }
+
+      // Global Event Listeners with Safe Lifecycle Cleanup & Power-User Shortcuts
+      function onKeyDown(e) {
+        // 1. Esc to close modals and popovers
+        if (e.key === 'Escape') {
+          if (isThemePopoverOpen.value) closeThemePopover();
+          if (commits.isDetailModalOpen.value) commits.closeCommitDetail();
+          if (settings.isSettingsModalOpen.value) settings.closeSettingsModal();
+          if (repos.activeRepoMenu.value) repos.closeRepoMenu();
+          return;
+        }
+
+        // 2. Ctrl/Cmd + Enter -> Quick Generate Report
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          if (!report.isTyping.value && commits.filteredCommits.value.length > 0) {
+            report.generateReport();
+          } else if (commits.filteredCommits.value.length === 0) {
+            toast.showToast('暂无提交记录可生成', 'warning');
+          }
+          return;
+        }
+
+        // 3. Ctrl/Cmd + , or Ctrl/Cmd + K -> Open Preferences
+        if ((e.ctrlKey || e.metaKey) && (e.key === ',' || e.key === 'k' || e.key === 'K')) {
+          e.preventDefault();
+          if (settings.isSettingsModalOpen.value) {
+            settings.closeSettingsModal();
+          } else {
+            settings.openSettingsModal('prompt');
+          }
+          return;
+        }
+      }
+
+      function onDocumentClick(e) {
+        if (isThemePopoverOpen.value && !e.target.closest('.theme-popover-container')) {
+          closeThemePopover();
+        }
+        if (repos.activeRepoMenu.value && !e.target.closest('.repo-menu-container')) {
+          repos.closeRepoMenu();
+        }
+      }
+
+      function onPaste(e) {
+        const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        if (activeTag === 'input' || activeTag === 'textarea' || document.activeElement.isContentEditable) {
+          return;
+        }
+        const text = e.clipboardData ? e.clipboardData.getData('text') : '';
+        if (text && text.trim()) {
+          const parsed = window.GitParser.parseTextLog(text);
+          if (parsed && parsed.length > 0) {
+            e.preventDefault();
+            repos.importCommits(parsed, 'PastedGitLog');
+            toast.showToast(`📋 已通过剪贴板成功快速导入 ${parsed.length} 条提交记录！`);
+          }
+        }
+      }
 
       onMounted(() => {
         repos.initRepoState();
@@ -204,39 +283,18 @@
           toast.showToast('⚙️ 已检测到本地 AI 配置');
         }
 
-        // 5. Global Escape & Click Outside listener
-        document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape') {
-            if (commits.isDetailModalOpen.value) commits.closeCommitDetail();
-            if (settings.isSettingsModalOpen.value) settings.closeSettingsModal();
-            if (repos.activeRepoMenu.value) repos.closeRepoMenu();
-          }
-        });
-
-        document.addEventListener('click', (e) => {
-          if (repos.activeRepoMenu.value && !e.target.closest('.repo-menu-container')) {
-            repos.closeRepoMenu();
-          }
-        });
-
-        // 6. Global Paste Git Log Listener
-        window.addEventListener('paste', (e) => {
-          const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
-          if (activeTag === 'input' || activeTag === 'textarea' || document.activeElement.isContentEditable) {
-            return;
-          }
-          const text = e.clipboardData ? e.clipboardData.getData('text') : '';
-          if (text && text.trim()) {
-            const parsed = window.GitParser.parseTextLog(text);
-            if (parsed && parsed.length > 0) {
-              e.preventDefault();
-              repos.importCommits(parsed, 'PastedGitLog');
-              toast.showToast(`📋 已通过剪贴板成功快速导入 ${parsed.length} 条提交记录！`);
-            }
-          }
-        });
+        // 5. Register Global Event Listeners
+        document.addEventListener('keydown', onKeyDown);
+        document.addEventListener('click', onDocumentClick);
+        window.addEventListener('paste', onPaste);
 
         refreshIcons();
+      });
+
+      onUnmounted(() => {
+        document.removeEventListener('keydown', onKeyDown);
+        document.removeEventListener('click', onDocumentClick);
+        window.removeEventListener('paste', onPaste);
       });
 
       return {
@@ -248,13 +306,25 @@
         motion,
         animatedWordCount,
 
-        // Theme
+        // Theme & Appearance Customizer
+        isThemePopoverOpen,
+        toggleThemePopover,
+        closeThemePopover,
+        setThemeMode,
         themeMode: theme.themeMode,
         isDark: theme.isDark,
         themeIcon: theme.themeIcon,
         themeTitle: theme.themeTitle,
         themeColorClass: theme.themeColorClass,
+        customThemeConfig: theme.customConfig,
+        colorPresets: theme.colorPresets,
+        radiusPresets: theme.radiusPresets,
+        glassPresets: theme.glassPresets,
         toggleTheme: theme.toggleTheme,
+        setColorPreset: theme.setColorPreset,
+        setRadiusPreset: theme.setRadiusPreset,
+        setGlassPreset: theme.setGlassPreset,
+        resetCustomConfig: theme.resetCustomConfig,
 
         // Repos
         recentRepos: repos.recentRepos,
@@ -311,6 +381,8 @@
         resetDefaultPrompt: settings.resetDefaultPrompt,
         saveSettings: settings.saveSettings,
         testConnection: settings.testConnection,
+        reportTemplates: settings.reportTemplates,
+        setTemplate: settings.setTemplate,
         itemCountOptions,
         providerOptions,
 
@@ -339,6 +411,7 @@
   if (window.SegmentedControl) app.component('SegmentedControl', window.SegmentedControl);
   if (window.RepoTagList) app.component('RepoTagList', window.RepoTagList);
   if (window.ReportEditor) app.component('ReportEditor', window.ReportEditor);
+  if (window.ThemeCustomizerPopover) app.component('ThemeCustomizerPopover', window.ThemeCustomizerPopover);
   if (window.CommitDetailModal) app.component('CommitDetailModal', window.CommitDetailModal);
   if (window.SettingsModal) app.component('SettingsModal', window.SettingsModal);
   if (window.RepoActionModal) app.component('RepoActionModal', window.RepoActionModal);
