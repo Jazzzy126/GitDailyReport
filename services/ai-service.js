@@ -9,24 +9,72 @@
 class AIService {
   static STORAGE_KEY = 'git_daily_report_ai_config';
 
-  static DEFAULT_SYSTEM_PROMPT = `你是资深软件工程师。把 Git Commit 记录压缩成精炼日报，只写最核心的已完成工作。
+  static REPORT_TEMPLATES = [
+    {
+      id: 'technical',
+      name: '技术精简版',
+      icon: 'code-2',
+      prompt: `你是资深软件工程师。请基于以下 Git 提交记录生成精炼工作日报。
+
+基准日期：{date}
+目标条目数：{item_count}
 
 要求：
 1. 归纳为 {item_count}，别多写；
-2. 每条前面标数字（1. 2. 3.），别用加粗、斜体；
-3. 每条只写一件事，控制在 20 字以内，用动词开头，直接说完成了什么或修复了什么；
-4. 如果包含多个不同项目的提交，请在每条描述中明确带有【项目名】标注（如：“1. 完成【前端项目】UI开发；2. 修复【后端项目】接口异常”）；
-5. 过滤掉无用的提交，比如合并代码、提交配置、更新依赖这类杂项，只保留有实际开发价值的内容；
-6. 别写“明日计划”、开场白、结束语；
-7. 第一行写「# 工作日报 (日期)」，换行后列条目。`;
+2. 每条前面标数字（1. 2. 3.），标明【Feature/Fix/Refactor】分类与【项目名】；
+3. 每条只写一件事，控制在 25 字以内，用动词开头，直接说完成了什么或修复了什么；
+4. 过滤掉无用的提交，比如合并代码、提交配置、更新依赖这类杂项；
+5. 第一行写「# 工作日报 ({date})」，换行后列条目。`
+    },
+    {
+      id: 'executive',
+      name: '管理汇报版',
+      icon: 'briefcase',
+      prompt: `你是技术负责人。请将 Git 提交记录整理为向上级汇报的业务成果日报。
+
+基准日期：{date}
+目标条目数：{item_count}
+
+要求：
+1. 提取最核心的业务交付价值，提炼为 {item_count} 条；
+2. 语言干练专业，突出功能上线、体验改善与业务价值，多项目带【项目名】；
+3. 结构包含【今日核心产出】与【明日工作规划】；
+4. 第一行写「# 工作汇报 ({date})」。`
+    },
+    {
+      id: 'concise',
+      name: '极简打卡版',
+      icon: 'zap',
+      prompt: `你是高效率工程师。把 Git Commit 记录压缩成极简打卡文本。
+
+基准日期：{date}
+目标条目数：{item_count}
+
+要求：
+1. 归纳为 {item_count} 条，每条 15 字以内；
+2. 纯文本格式：序号 + 核心进展（多项目带【项目名】）；
+3. 严禁开场白、结束语和多余标题，适合直接发群打卡。`
+    }
+  ];
+
+  static DEFAULT_SYSTEM_PROMPT = AIService.REPORT_TEMPLATES[0].prompt;
 
   static getConfig() {
     try {
       const saved = localStorage.getItem(this.STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
+        if (!parsed.customPrompts) {
+          parsed.customPrompts = {};
+          this.REPORT_TEMPLATES.forEach(t => {
+            parsed.customPrompts[t.id] = t.prompt;
+          });
+        }
+        if (!parsed.templateId) {
+          parsed.templateId = 'technical';
+        }
         if (!parsed.systemPrompt) {
-          parsed.systemPrompt = this.DEFAULT_SYSTEM_PROMPT;
+          parsed.systemPrompt = parsed.customPrompts[parsed.templateId] || this.DEFAULT_SYSTEM_PROMPT;
         }
         if (!parsed.itemCount) {
           parsed.itemCount = '2-3';
@@ -37,12 +85,19 @@ class AIService {
       console.error('Failed to load AI config from localStorage', e);
     }
 
+    const defaultPrompts = {};
+    this.REPORT_TEMPLATES.forEach(t => {
+      defaultPrompts[t.id] = t.prompt;
+    });
+
     return {
       provider: 'deepseek',
       apiKey: '',
       baseUrl: 'https://api.deepseek.com/v1',
       model: 'deepseek-chat',
       itemCount: '2-3',
+      templateId: 'technical',
+      customPrompts: defaultPrompts,
       systemPrompt: this.DEFAULT_SYSTEM_PROMPT
     };
   }
@@ -144,22 +199,27 @@ class AIService {
       ? config.systemPrompt 
       : this.DEFAULT_SYSTEM_PROMPT;
 
-    // Dynamically replace {item_count} template variable with calculated text
+    // 1. Calculate and replace {item_count} & {items}
     const itemCountText = this.getItemCountText(config.itemCount, commits.length);
-    
-    if (basePrompt.includes('{item_count}')) {
-      basePrompt = basePrompt.replaceAll('{item_count}', itemCountText);
-    } else {
-      // Fallback replace rule 1 if template variable isn't present
-      basePrompt = basePrompt.replace(/^1\.\s+.*$/m, `1. 归纳为 ${itemCountText}，别多写；`);
-    }
+    basePrompt = basePrompt.replaceAll('{item_count}', itemCountText);
+    basePrompt = basePrompt.replaceAll('{items}', itemCountText);
 
+    // 2. Replace {date}
+    basePrompt = basePrompt.replaceAll('{date}', reportDate);
+
+    // 3. Prepare commits text
     const commitsSummary = commits.map((c, idx) => {
       const repoTag = c.repoName ? `[${c.repoName}] ` : '';
       return `${idx + 1}. ${repoTag}[${c.date}] ${c.author}: ${c.message} (Hash: #${c.hash})`;
     }).join('\n');
 
-    const userPrompt = `【今日基准日期】: ${reportDate}\n【生成条数硬性要求】: 归纳为 ${itemCountText}\n\n【原始 Git 提交记录 (${commits.length}条)】:\n${commitsSummary}\n\n请严格按照上述要求生成对应数量的精炼日报条目。如果包含多个项目，请在每条简记中保留【项目名】。`;
+    let userPrompt = '';
+    if (basePrompt.includes('{commits}')) {
+      basePrompt = basePrompt.replaceAll('{commits}', commitsSummary);
+      userPrompt = `请基于系统提示词中的 Git 提交记录，生成今日工作日报。`;
+    } else {
+      userPrompt = `【今日基准日期】: ${reportDate}\n【生成条目要求】: 归纳为 ${itemCountText}\n\n【原始 Git 提交记录 (${commits.length}条)】:\n${commitsSummary}\n\n请严格按照要求生成对应数量的精炼日报条目。如果包含多个项目，请在每条简记中保留【项目名】。`;
+    }
 
     let url = config.baseUrl.trim();
     if (!url.endsWith('/chat/completions')) {
