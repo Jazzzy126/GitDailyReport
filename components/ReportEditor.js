@@ -2,6 +2,7 @@
  * ReportEditor Component
  * Apple Studio Pro Report Output & Markdown Editor Pane
  * Features: Markdown Visual Preview / Source Switcher, Rich Text HTML Copy, Token-level Typing Stream & Hero Ready State.
+ * Full i18n support
  */
 
 (function (window) {
@@ -32,10 +33,31 @@
       let mdCopyTimer = null;
       let htmlCopyTimer = null;
 
+      const i18n = window.useI18n ? window.useI18n() : null;
+      function t(key, params) {
+        return i18n ? i18n.t(key, params) : key;
+      }
+
       const activeTemplateName = computed(() => {
         const list = templates.value || [];
         const found = list.find(t => t.id === currentTemplate.value);
-        return found ? found.name : '标准版';
+        if (found) {
+          const tplI18nKey = `templates.${found.id}`;
+          const localized = t(tplI18nKey);
+          return localized !== tplI18nKey ? localized : found.name;
+        }
+        return t('templates.technical');
+      });
+
+      const localizedTemplates = computed(() => {
+        return (templates.value || []).map(tpl => {
+          const tplI18nKey = `templates.${tpl.id}`;
+          const localized = t(tplI18nKey);
+          return {
+            ...tpl,
+            displayName: localized !== tplI18nKey ? localized : tpl.name
+          };
+        });
       });
 
       const renderedPreviewHtml = computed(() => {
@@ -121,6 +143,7 @@
         commitCount,
         currentTemplate,
         templates,
+        localizedTemplates,
         isTemplateMenuOpen,
         viewMode,
         isPlainCopied,
@@ -128,6 +151,7 @@
         isHtmlCopied,
         activeTemplateName,
         renderedPreviewHtml,
+        t,
         onInput,
         onGenerate,
         onCopyPlain,
@@ -138,7 +162,7 @@
       };
     },
     template: `
-      <studio-pane title="工作日报输出 Studio" icon="file-text" custom-class="h-full">
+      <studio-pane :title="t('report.paneTitle')" icon="file-text" custom-class="h-full">
         <template #header-right>
           <div class="flex items-center gap-2">
             <!-- View Mode Switcher (Edit vs Preview) -->
@@ -152,7 +176,7 @@
                     ? 'bg-[var(--md-sys-color-primary)] text-white shadow-xs'
                     : 'text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)]'
                 ]">
-                编辑
+                {{ t('report.edit') }}
               </button>
               <button
                 type="button"
@@ -163,7 +187,7 @@
                     ? 'bg-[var(--md-sys-color-primary)] text-white shadow-xs'
                     : 'text-[var(--md-sys-color-on-surface-variant)] hover:text-[var(--md-sys-color-on-surface)]'
                 ]">
-                预览
+                {{ t('report.preview') }}
               </button>
             </div>
 
@@ -173,7 +197,7 @@
             </div>
             <div class="studio-badge-pill font-mono tabular-nums">
               <studio-icon name="type" class="w-3 h-3 shrink-0 text-[var(--md-sys-color-primary)]"></studio-icon>
-              <span class="tabular-nums font-bold">{{ wordCount }} 字</span>
+              <span class="tabular-nums font-bold">{{ t('report.wordCount', { count: wordCount }) }}</span>
             </div>
           </div>
         </template>
@@ -191,11 +215,11 @@
                   @click="onGenerate"
                   :disabled="isTyping || commitCount === 0"
                   class="studio-split-main focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)] disabled:opacity-50"
-                  title="快捷键：Ctrl/Cmd + Enter"
-                  aria-label="生成日报 (快捷键 Ctrl+Enter)">
+                  title="Ctrl/Cmd + Enter"
+                  :aria-label="t('report.generateBtn')">
                   <studio-icon name="sparkles" class="w-4 h-4 text-amber-300 animate-pulse"></studio-icon>
                   <span class="font-heading font-black">
-                    {{ isTyping ? '正在流式撰写中…' : ('生成日报 (' + activeTemplateName + ')') }}
+                    {{ isTyping ? t('report.generatingBtn') : (t('report.generateBtn') + ' (' + activeTemplateName + ')') }}
                   </span>
                 </button>
 
@@ -205,8 +229,8 @@
                   @click="toggleTemplateMenu"
                   :disabled="isTyping"
                   class="studio-split-arrow focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)] disabled:opacity-50"
-                  title="切换日报风格模板"
-                  aria-label="切换日报风格模板"
+                  :title="t('report.templateLabel')"
+                  :aria-label="t('report.templateLabel')"
                   :aria-expanded="isTemplateMenuOpen">
                   <studio-icon name="chevron-down" :class="['studio-split-chevron', { 'is-open': isTemplateMenuOpen }]"></studio-icon>
                 </button>
@@ -218,7 +242,7 @@
                   v-show="isTemplateMenuOpen"
                   class="absolute left-0 top-full mt-1.5 w-48 p-1.5 rounded-xl z-50 bg-[var(--md-sys-color-surface-container-highest)] backdrop-blur-2xl border border-[var(--md-sys-color-outline-variant)] shadow-2xl space-y-1">
                   <button
-                    v-for="tpl in templates"
+                    v-for="tpl in localizedTemplates"
                     :key="tpl.id"
                     type="button"
                     @click="onSelectTemplate(tpl.id)"
@@ -230,7 +254,7 @@
                     ]">
                     <span class="flex items-center gap-2">
                       <studio-icon :name="tpl.icon" class="w-3.5 h-3.5"></studio-icon>
-                      <span>{{ tpl.name }}</span>
+                      <span>{{ tpl.displayName }}</span>
                     </span>
                     <studio-icon v-if="currentTemplate === tpl.id" name="check" class="w-3.5 h-3.5 stroke-[2.5] text-[var(--md-sys-color-primary)]"></studio-icon>
                   </button>
@@ -249,10 +273,10 @@
                   'studio-btn cursor-pointer transition shadow-xs disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)]',
                   isHtmlCopied ? 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30' : 'studio-btn-primary'
                 ]"
-                title="复制带排版富文本，支持直接粘贴到飞书/企微/钉钉/邮件"
-                aria-label="复制富文本日报">
+                :title="t('report.copyHtml')"
+                :aria-label="t('report.copyHtml')">
                 <studio-icon :name="isHtmlCopied ? 'check' : 'wand-2'" :class="['w-4 h-4 transition-transform', isHtmlCopied ? 'text-emerald-500 scale-110' : 'text-amber-300']"></studio-icon>
-                <span class="font-bold">{{ isHtmlCopied ? '已复制富文本' : '复制富文本' }}</span>
+                <span class="font-bold">{{ isHtmlCopied ? t('report.copied') : t('report.copyHtml') }}</span>
               </button>
 
               <button
@@ -263,9 +287,9 @@
                   'studio-btn cursor-pointer transition shadow-xs disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)]',
                   isPlainCopied ? 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30' : 'studio-btn-secondary'
                 ]"
-                aria-label="复制纯文本日报">
+                :aria-label="t('report.copyPlain')">
                 <studio-icon :name="isPlainCopied ? 'check' : 'copy'" :class="['w-4 h-4 transition-transform', isPlainCopied ? 'text-emerald-500 scale-110' : 'opacity-70']"></studio-icon>
-                <span>{{ isPlainCopied ? '已复制纯文本' : '复制纯文本' }}</span>
+                <span>{{ isPlainCopied ? t('report.copied') : t('report.copyPlain') }}</span>
               </button>
 
               <button
@@ -276,9 +300,9 @@
                   'studio-btn cursor-pointer transition disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)]',
                   isMdCopied ? 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30' : 'studio-btn-secondary'
                 ]"
-                aria-label="复制 Markdown 格式日报">
+                :aria-label="t('report.copyMd')">
                 <studio-icon :name="isMdCopied ? 'check' : 'file-code'" :class="['w-4 h-4 transition-transform', isMdCopied ? 'text-emerald-500 scale-110' : 'opacity-70']"></studio-icon>
-                <span>{{ isMdCopied ? '已复制 MD' : '复制 MD' }}</span>
+                <span>{{ isMdCopied ? t('report.copied') : t('report.copyMd') }}</span>
               </button>
             </div>
           </div>
@@ -293,14 +317,14 @@
                 <studio-icon name="sparkles" class="w-7 h-7"></studio-icon>
               </div>
               <h3 class="font-heading font-black text-sm sm:text-base tracking-tight mb-1">
-                {{ commitCount > 0 ? (commitCount + ' 条提交记录已就绪') : '等待导入 Git 提交记录' }}
+                {{ t('report.readyHeadline') }}
               </h3>
               <p class="text-xs opacity-65 max-w-sm mb-3 leading-relaxed">
-                {{ commitCount > 0 ? 'AI 已准备就绪，点击上方主按钮或使用快捷键提炼精炼工作汇报' : '请在左侧拖拽 Git 仓库文件夹或选择预置项目' }}
+                {{ t('report.readySubheadline', { commits: commitCount }) }}
               </p>
               <div v-if="commitCount > 0" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-black/5 dark:bg-white/5 border border-[var(--md-sys-color-outline-variant)] text-[11px] font-mono opacity-80">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>快捷键 <kbd class="px-1.5 py-0.5 rounded bg-black/10 dark:bg-white/10 font-bold">Ctrl + Enter</kbd> 极速生成</span>
+                <span>Ctrl / Cmd + Enter</span>
               </div>
             </div>
 
@@ -319,9 +343,9 @@
                 name="reportOutput"
                 :value="modelValue"
                 @input="onInput"
-                aria-label="工作日报输出与编辑区"
+                :aria-label="t('report.paneTitle')"
                 :class="['studio-editor-textarea w-full flex-1 h-full p-4 text-[13px] sm:text-sm leading-6 ios-input-box rounded-2xl resize-none custom-scrollbar font-medium transition-all duration-300 relative z-10', { 'is-generating-report': isTyping, 'opacity-0': !modelValue && !isTyping }]"
-                placeholder="生成的日报将在此处呈现，您可以随意在此处实时修改补充…"></textarea>
+                :placeholder="t('report.placeholder')"></textarea>
             </div>
           </div>
         </div>

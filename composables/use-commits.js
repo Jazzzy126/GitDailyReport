@@ -1,7 +1,7 @@
 /**
  * useCommits Composable
  * Commits filtering by author & date, commit inspector modal management
- * Optimized for performance and clean memoization
+ * Optimized for performance and clean memoization with full i18n support
  */
 
 (function (window) {
@@ -14,6 +14,11 @@
 
   function useCommits({ mergedCommits, showToast }) {
     const { ref, computed } = window.Vue;
+    const i18n = window.useI18n ? window.useI18n() : null;
+
+    function t(key, params) {
+      return i18n ? i18n.t(key, params) : key;
+    }
 
     const filterDate = ref(getLocalDateString());
     const filterAuthor = ref('all');
@@ -34,10 +39,10 @@
     const hasMultipleAuthors = computed(() => authorsList.value.length > 1);
     const singleAuthorName = computed(() => (authorsList.value.length === 1 ? authorsList.value[0] : ''));
 
-    // Dynamic Author Options from mergedCommits
+    // Dynamic Author Options from mergedCommits with responsive i18n
     const authorOptions = computed(() => {
       const authors = authorsList.value;
-      const options = [{ value: 'all', label: '所有提交人' }];
+      const options = [{ value: 'all', label: t('commits.allAuthors') }];
       for (let i = 0; i < authors.length; i++) {
         options.push({ value: authors[i], label: authors[i] });
       }
@@ -106,13 +111,13 @@
       if (!activeDetailCommit.value) return;
       const sha = activeDetailCommit.value.fullHash || activeDetailCommit.value.hash;
       navigator.clipboard.writeText(sha);
-      showToast('📋 已复制 40 位 Git SHA Checksum');
+      showToast(t('commitDetail.hashCopied'));
     }
 
     function copyCommitMsg() {
       if (!activeDetailCommit.value || !activeDetailCommit.value.message) return;
       navigator.clipboard.writeText(activeDetailCommit.value.message);
-      showToast('📋 已复制 Commit 完整日志 Message');
+      showToast(t('commitDetail.msgCopied'));
     }
 
     return {

@@ -2,6 +2,7 @@
  * useReport Composable
  * Report Generation (AI-driven & Rule-based fallback), Word Count & Clipboard Actions
  * Integrated with Typewriter Streaming Effect & Confetti Celebration
+ * Full i18n support
  */
 
 (function (window) {
@@ -17,6 +18,11 @@
     motion
   }) {
     const { ref, computed } = window.Vue;
+    const i18n = window.useI18n ? window.useI18n() : null;
+
+    function t(key, params) {
+      return i18n ? i18n.t(key, params) : key;
+    }
 
     const reportOutput = ref('');
     const isTyping = ref(false);
@@ -28,7 +34,6 @@
     function stripMarkdownToPlain(mdText) {
       if (!mdText) return '';
 
-      // 优先使用 marked.lexer 工业级 AST 解析提取纯文本
       if (window.marked && typeof window.marked.lexer === 'function') {
         try {
           const tokens = window.marked.lexer(mdText);
@@ -70,7 +75,7 @@
                   result += extractText(token.tokens || [{ text: token.text }]);
                   break;
                 case 'image':
-                  result += token.text ? `[图片: ${token.text}]` : '';
+                  result += token.text ? `[${token.text}]` : '';
                   break;
                 case 'space':
                 case 'hr':
@@ -91,63 +96,46 @@
           const text = extractText(tokens).replace(/\n{3,}/g, '\n\n').trim();
           if (text) return text;
         } catch (e) {
-          console.warn('[useReport] marked lexer 解析异常，使用降级逻辑', e);
+          console.warn('[useReport] marked lexer error, fallback to regex', e);
         }
       }
 
-      // 降级正则兜底
       return mdText
         .replace(/^#+\s+(.*$)/gm, '$1\n')
-        .replace(/\*\*([^*]+)\*\*/g, '$1')
-        .replace(/\*([^*]+)\*/g, '$1')
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
         .replace(/`([^`]+)`/g, '$1')
-        .replace(/^-\s+/gm, '• ')
-        .replace(/```[\s\S]*?```/g, '')
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+        .replace(/^[-*+]\s+/gm, '• ')
+        .replace(/\n{3,}/g, '\n\n')
         .trim();
     }
 
     function generateStandardReport(commits) {
-      if (!commits || commits.length === 0) return '无提交记录';
+      const isMultiRepo = selectedRepoNames && selectedRepoNames.value && selectedRepoNames.value.length > 1;
+      const targetDate = filterDate && filterDate.value ? filterDate.value : new Date().toISOString().split('T')[0];
 
-      const reportDate = filterDate.value || new Date().toISOString().split('T')[0];
-      let output = `# 工作日报 (${reportDate})\n\n`;
-
-      const aiConfig = window.AIService ? window.AIService.getConfig() : { itemCount: '2-3' };
-      let maxItems = 3;
-      if (aiConfig.itemCount === '3-5') maxItems = 5;
-      else if (aiConfig.itemCount === '5-8') maxItems = 8;
-      else if (aiConfig.itemCount === 'auto') {
-        if (commits.length >= 12) maxItems = 7;
-        else if (commits.length >= 6) maxItems = 5;
-        else if (commits.length >= 3) maxItems = 4;
-        else maxItems = commits.length;
+      let output = `# ${t('report.paneTitle')} (${targetDate})\n\n`;
+      const pool = commits || [];
+      if (pool.length === 0) {
+        output += `1. ${t('report.noCommitsWarn')}\n`;
+        return output;
       }
 
-      const validCommits = commits.filter(c => {
-        const msg = (c.message || '').toLowerCase();
-        if (
-          msg.includes('merge') ||
-          msg.includes('deps') ||
-          msg.includes('chore') ||
-          msg.includes('wip') ||
-          msg.includes('bump') ||
-          msg.includes('提交配置') ||
-          msg.includes('更新依赖') ||
-          msg.includes('合并分支')
-        ) {
-          return false;
-        }
-        return true;
-      });
+      const aiCfg = window.AIService ? window.AIService.getConfig() : {};
+      let maxItems = 3;
+      if (aiCfg.itemCount === '3-5') maxItems = 4;
+      else if (aiCfg.itemCount === '5-8') maxItems = 6;
+      else if (aiCfg.itemCount === 'auto') {
+        maxItems = pool.length <= 3 ? 2 : pool.length <= 8 ? 4 : 6;
+      }
 
-      const pool = validCommits.length > 0 ? validCommits : commits;
-      const isMultiRepo = selectedRepoNames.value.length > 1;
-
-      if (pool.length <= maxItems) {
-        pool.forEach((c, idx) => {
-          const cleanMsg = c.message.replace(/^.*?:\s*/, '').slice(0, 18);
+      if (aiCfg.templateId === 'concise') {
+        const topCommits = pool.slice(0, maxItems);
+        topCommits.forEach((c, idx) => {
           const repoPrefix = isMultiRepo && c.repoName ? `【${getRepoDisplayName(c.repoName)}】` : '';
-          output += `${idx + 1}. 完成${repoPrefix}${cleanMsg}\n`;
+          const cleanMsg = c.message.replace(/^.*?:\s*/, '').slice(0, 20);
+          output += `${idx + 1}. ${repoPrefix}${cleanMsg}\n`;
         });
         return output;
       }
@@ -161,13 +149,13 @@
       if (featureCommits.length > 0) {
         const repoTag = isMultiRepo && featureCommits[0].repoName ? `【${getRepoDisplayName(featureCommits[0].repoName)}】` : '';
         const msgs = featureCommits.map(c => c.message.replace(/^.*?:\s*/, '')).join('、');
-        bulletPoints.push(`完成${repoTag}核心功能开发与交付（${msgs.slice(0, 12)}）`);
+        bulletPoints.push(`${repoTag}${msgs.slice(0, 25)}`);
       }
 
       if (fixCommits.length > 0) {
         const repoTag = isMultiRepo && fixCommits[0].repoName ? `【${getRepoDisplayName(fixCommits[0].repoName)}】` : '';
         const msgs = fixCommits.map(c => c.message.replace(/^.*?:\s*/, '')).join('、');
-        bulletPoints.push(`修复${repoTag}系统运行缺陷并提升稳定性（${msgs.slice(0, 12)}）`);
+        bulletPoints.push(`${repoTag}${msgs.slice(0, 25)}`);
       }
 
       if (otherCommits.length > 0 || bulletPoints.length < maxItems) {
@@ -175,8 +163,8 @@
         subPool.forEach(c => {
           if (bulletPoints.length < maxItems) {
             const repoTag = isMultiRepo && c.repoName ? `【${getRepoDisplayName(c.repoName)}】` : '';
-            const cleanMsg = c.message.replace(/^.*?:\s*/, '').slice(0, 16);
-            bulletPoints.push(`推进${repoTag}${cleanMsg}`);
+            const cleanMsg = c.message.replace(/^.*?:\s*/, '').slice(0, 20);
+            bulletPoints.push(`${repoTag}${cleanMsg}`);
           }
         });
       }
@@ -192,28 +180,18 @@
     async function generateReport() {
       const commits = filteredCommits.value;
       if (!commits || commits.length === 0) {
-        showToast('当前筛选条件下没有 Commit 提交记录', 'warning');
+        showToast(t('report.noCommitsWarn'), 'warning');
         return;
       }
 
       const aiConfig = window.AIService ? window.AIService.getConfig() : {};
       if (!aiConfig.apiKey || !aiConfig.apiKey.trim()) {
-        showToast('💡 尚未配置 AI 大模型 API Key，已为您打开【AI设置】', 'warning');
+        showToast(t('settingsModal.apiKeyRequiredToast'), 'warning');
         openSettingsModal('ai');
         return;
       }
 
-      let loadingText = '✨ AI 正在为您精炼归纳 2-3 条日报…';
-      if (aiConfig.itemCount === '3-5') {
-        loadingText = '✨ AI 正在为您提炼 3-5 条日报…';
-      } else if (aiConfig.itemCount === '5-8') {
-        loadingText = '✨ AI 正在为您提炼 5-8 条日报…';
-      } else if (aiConfig.itemCount === 'auto') {
-        const targetStr = window.AIService.getAdaptiveTargetCountStr(commits.length);
-        loadingText = `✨ AI 正在根据 ${commits.length} 条提交自适应归纳 ${targetStr} 条日报…`;
-      }
-
-      showLoading(loadingText);
+      showLoading(t('report.generatingLoading'));
       try {
         const commitsWithDisplayName = commits.map(c => ({
           ...c,
@@ -223,7 +201,6 @@
         const result = await window.AIService.generateReport(commitsWithDisplayName);
         hideLoading();
 
-        // Typewriter streaming effect
         if (motion && motion.runTypewriter) {
           isTyping.value = true;
           reportOutput.value = '';
@@ -233,12 +210,12 @@
             (curr) => { reportOutput.value = curr; },
             () => {
               isTyping.value = false;
-              showToast('🎉 AI 已为您生成精炼日报！');
+              showToast(t('report.generateSuccess'));
             }
           );
         } else {
           reportOutput.value = result;
-          showToast('🎉 AI 已为您生成精炼日报！');
+          showToast(t('report.generateSuccess'));
         }
       } catch (err) {
         hideLoading();
@@ -256,7 +233,6 @@
         rawHtml = mdText.replace(/\n/g, '<br>');
       }
 
-      // Inject refined inline styles for Feishu, DingTalk, WeChat, Outlook & Apple Mail
       return `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; font-size: 14px; line-height: 1.75; color: #1f2328;">
           ${rawHtml}
@@ -276,7 +252,7 @@
     async function copyHtml() {
       const text = reportOutput.value;
       if (!text || !text.trim()) {
-        showToast('内容为空，请先点击【生成日报】', 'warning');
+        showToast(t('report.noCommitsWarn'), 'warning');
         return false;
       }
 
@@ -293,17 +269,17 @@
               'text/plain': textBlob
             })
           ]);
-          showToast('🎨 已复制富文本 (支持直接粘贴飞书/企微/钉钉)');
+          showToast(t('toast.copySuccess'));
           return true;
         } else {
           await navigator.clipboard.writeText(plainText);
-          showToast('📝 当前环境不支持富文本，已降级复制纯文本');
+          showToast(t('toast.copySuccess'));
           return true;
         }
       } catch (err) {
-        console.warn('[useReport] 富文本写入剪贴板异常，降级纯文本', err);
+        console.warn('[useReport] Copy rich text error, fallback to plain', err);
         await navigator.clipboard.writeText(plainText);
-        showToast('📝 已降级复制纯文本');
+        showToast(t('toast.copySuccess'));
         return true;
       }
     }
@@ -311,22 +287,22 @@
     function copyPlain() {
       const text = reportOutput.value;
       if (!text || !text.trim()) {
-        showToast('内容为空，请先点击【生成日报】', 'warning');
+        showToast(t('report.noCommitsWarn'), 'warning');
         return;
       }
       const plainText = stripMarkdownToPlain(text);
       navigator.clipboard.writeText(plainText);
-      showToast('📝 已复制纯文本 (已去除 Markdown 符号)');
+      showToast(t('toast.copySuccess'));
     }
 
     function copyMd() {
       const text = reportOutput.value;
       if (!text || !text.trim()) {
-        showToast('内容为空，请先点击【生成日报】', 'warning');
+        showToast(t('report.noCommitsWarn'), 'warning');
         return;
       }
       navigator.clipboard.writeText(text);
-      showToast('📄 Markdown 已复制');
+      showToast(t('toast.copySuccess'));
     }
 
     return {

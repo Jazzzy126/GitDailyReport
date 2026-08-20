@@ -1,6 +1,7 @@
 /**
  * RepoTagList Component
  * Instant, crisp, professional Multi-Repo Tag List with Zero Animation Lag
+ * Full i18n support
  */
 
 (function (window) {
@@ -17,6 +18,11 @@
     emits: ['toggle-select-all', 'toggle-selection', 'open-menu'],
     setup(props, { emit }) {
       const { recentRepos, selectedRepoNames, activeRepoMenu, repoAliases } = toRefs(props);
+      const i18n = window.useI18n ? window.useI18n() : null;
+
+      function t(key, params) {
+        return i18n ? i18n.t(key, params) : key;
+      }
 
       function getDisplayName(name) {
         return (repoAliases.value && repoAliases.value[name]) || name;
@@ -39,6 +45,7 @@
         selectedRepoNames,
         activeRepoMenu,
         getDisplayName,
+        t,
         onToggleSelectAll,
         onToggleSelection,
         onOpenMenu
@@ -49,14 +56,14 @@
         <div class="flex items-center justify-between text-xs mb-2">
           <span class="font-bold opacity-70 flex items-center gap-1.5">
             <studio-icon name="layers" class="w-3.5 h-3.5 text-[var(--md-sys-color-primary)]"></studio-icon>
-            <span>最近项目 (点击标签多选)</span>
+            <span>{{ t('repo.recentTitle') }}</span>
           </span>
           <button
             type="button"
             @click="onToggleSelectAll"
             class="text-[11px] font-bold text-[var(--md-sys-color-primary)] hover:underline cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--md-sys-color-primary)] rounded px-1"
-            :aria-label="selectedRepoNames.length === recentRepos.length ? '清空所有已选项目' : '全选所有最近项目'">
-            {{ selectedRepoNames.length === recentRepos.length ? '清空选择' : '全选项目' }}
+            :aria-label="selectedRepoNames.length === recentRepos.length ? t('repo.clearAllAria') : t('repo.selectAllAria')">
+            {{ selectedRepoNames.length === recentRepos.length ? t('repo.clearSelection') : t('repo.selectAll') }}
           </button>
         </div>
 
@@ -84,7 +91,7 @@
                 :name="selectedRepoNames.includes(r.repoName) ? 'check' : 'git-branch'"
                 :class="['w-3.5 h-3.5 shrink-0', selectedRepoNames.includes(r.repoName) ? 'text-[var(--md-sys-color-primary)]' : 'opacity-70']"></studio-icon>
 
-              <span class="truncate max-w-36 leading-none" :title="'真实仓库名: ' + r.repoName">
+              <span class="truncate max-w-36 leading-none" :title="r.repoName">
                 {{ getDisplayName(r.repoName) }}
               </span>
 
@@ -98,8 +105,8 @@
                     ? 'bg-[var(--md-sys-color-primary)] text-white shadow-xs font-bold'
                     : 'opacity-70 hover:opacity-100 text-current hover:bg-black/15 dark:hover:bg-white/25'
                 ]"
-                :title="'项目操作菜单: ' + getDisplayName(r.repoName)"
-                :aria-label="'项目操作菜单: ' + getDisplayName(r.repoName)">
+                :title="t('repo.moreOptions') + ': ' + getDisplayName(r.repoName)"
+                :aria-label="t('repo.moreOptions') + ': ' + getDisplayName(r.repoName)">
                 <studio-icon name="more-horizontal" class="w-3.5 h-3.5"></studio-icon>
               </button>
             </div>

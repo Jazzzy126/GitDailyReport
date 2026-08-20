@@ -1,11 +1,17 @@
 /**
  * useSettings Composable
  * Settings Modal, Prompts & AI Model Configuration, Multi-Template Management, Connection Testing
+ * Full i18n support
  */
 
 (function (window) {
   function useSettings({ showToast }) {
     const { ref, reactive } = window.Vue;
+    const i18n = window.useI18n ? window.useI18n() : null;
+
+    function t(key, params) {
+      return i18n ? i18n.t(key, params) : key;
+    }
 
     const isSettingsModalOpen = ref(false);
     const settingsTab = ref('prompt'); // 'prompt' | 'ai' | 'theme'
@@ -52,7 +58,9 @@
         aiConfig.systemPrompt = aiConfig.customPrompts[tplId] || found.prompt;
         window.AIService.saveConfig(aiConfig);
         if (!silent) {
-          showToast('已切换至「' + found.name + '」模板');
+          const tplI18nKey = `templates.${found.id}`;
+          const tplName = t(tplI18nKey) !== tplI18nKey ? t(tplI18nKey) : found.name;
+          showToast(t('report.templateCurrent', { name: tplName }));
         }
       }
     }
@@ -92,7 +100,9 @@
           aiConfig.systemPrompt = found.prompt;
           aiConfig.customPrompts[aiConfig.templateId] = found.prompt;
           window.AIService.saveConfig(aiConfig);
-          showToast(`✨ 已恢复「${found.name}」的系统默认提示词`);
+          const tplI18nKey = `templates.${found.id}`;
+          const tplName = t(tplI18nKey) !== tplI18nKey ? t(tplI18nKey) : found.name;
+          showToast(t('settingsModal.promptResetToast', { name: tplName }));
         }
       }
     }
@@ -115,12 +125,12 @@
         });
       }
       isSettingsModalOpen.value = false;
-      showToast('⚙️ 配置保存成功');
+      showToast(t('settingsModal.saveSuccessToast'));
     }
 
     async function testConnection() {
       if (!aiConfig.apiKey || !aiConfig.apiKey.trim()) {
-        showToast('请先填写 API Key 再测试连通性', 'warning');
+        showToast(t('settingsModal.apiKeyRequiredToast'), 'warning');
         return;
       }
 
@@ -132,9 +142,9 @@
           baseUrl: aiConfig.baseUrl.trim(),
           model: aiConfig.model.trim()
         });
-        showToast(`✅ API 接口连通成功！(响应耗时 ${res.latencyMs}ms)`);
+        showToast(t('settingsModal.testSuccessToast', { latency: res.latencyMs }));
       } catch (err) {
-        showToast(`❌ 连通失败: ${err.message}`, 'error');
+        showToast(t('settingsModal.testFailedToast', { error: err.message }), 'error');
       } finally {
         isTestingConnection.value = false;
       }

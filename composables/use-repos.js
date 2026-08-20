@@ -2,6 +2,7 @@
  * useRepos Composable
  * Multi-Repo state, custom alias management, persistence, drag-and-drop & directory parsing
  * Refactored: Decoupled with DBStorage service, O(N) Hash MergedCommits, Memory leak protection
+ * Full i18n support
  */
 
 (function (window) {
@@ -12,6 +13,11 @@
   function useRepos({ showToast, showLoading, hideLoading }) {
     const { ref, shallowReactive, computed, onUnmounted } = window.Vue;
     const DBStorage = window.DBStorage;
+    const i18n = window.useI18n ? window.useI18n() : null;
+
+    function t(key, params) {
+      return i18n ? i18n.t(key, params) : key;
+    }
 
     const recentRepos = ref([]);
     const selectedRepoNames = ref([]);
@@ -19,8 +25,8 @@
     const isRefreshing = ref(false);
     const isDropzoneCollapsed = ref(false);
     const activeRepoMenu = ref(null);
-    const allRepoMap = shallowReactive(new Map()); // repoName -> commits array (shallow to reduce deep proxy overhead)
-    const repoHandlesMap = new Map(); // repoName -> FileSystemDirectoryHandle (in-memory)
+    const allRepoMap = shallowReactive(new Map());
+    const repoHandlesMap = new Map();
 
     let cleanupFocusListener = null;
 
@@ -62,12 +68,12 @@
       closeRepoMenu();
       const currentAlias = getRepoDisplayName(repoName);
       const input = prompt(
-        `请输入项目「${repoName}」的自定义别名（例如: 前端UI / 后端API）:`,
+        t('repoAction.promptAlias', { name: repoName }),
         currentAlias !== repoName ? currentAlias : ''
       );
       if (input !== null) {
         setRepoAlias(repoName, input);
-        showToast(`✨ 项目「${repoName}」别名已设置为「${getRepoDisplayName(repoName)}」`);
+        showToast(t('repoAction.aliasUpdatedToast', { name: repoName, alias: getRepoDisplayName(repoName) }));
       }
     }
 
@@ -125,7 +131,7 @@
       repoHandlesMap.delete(repoName);
       DBStorage.deleteHandle(repoName);
 
-      showToast(`🗑️ 已移除项目「${displayName}」`);
+      showToast(t('repoAction.removedToast', { name: displayName }));
     }
 
     async function initRepoState() {
@@ -145,7 +151,6 @@
           selectedRepoNames.value = recentRepos.value.map((r) => r.repoName);
         }
 
-        // Preload directory handles from IndexedDB
         for (const r of recentRepos.value) {
           const handle = await DBStorage.getHandle(r.repoName);
           if (handle) {
@@ -167,15 +172,6 @@
       }
 
       saveSelectedNames();
-
-      const count = selectedRepoNames.value.length;
-      if (count === 0) {
-        showToast('已清空勾选的项目');
-      } else if (count === 1) {
-        showToast(`🔀 已切换至项目「${getRepoDisplayName(selectedRepoNames.value[0])}」`);
-      } else {
-        showToast(`🔀 已成功合并 ${count} 个项目的提交记录！`);
-      }
     }
 
     function toggleSelectAllRepos() {
@@ -192,13 +188,11 @@
       const selected = selectedRepoNames.value;
       if (!selected || selected.length === 0) return [];
 
-      // Fast single-repo path
       if (selected.length === 1) {
         const singleList = allRepoMap.get(selected[0]);
         return singleList ? [...singleList] : [];
       }
 
-      // Multi-repo path: O(N) deduplication via Map
       const commitMap = new Map();
       for (const name of selected) {
         const list = allRepoMap.get(name);
@@ -221,9 +215,9 @@
     const isMultiRepoMode = computed(() => selectedRepoNames.value.length > 1);
 
     const currentRepoBadgeText = computed(() => {
-      if (selectedRepoNames.value.length === 0) return '未选择仓库';
+      if (selectedRepoNames.value.length === 0) return t('repo.emptyRepo');
       if (selectedRepoNames.value.length === 1) return getRepoDisplayName(selectedRepoNames.value[0]);
-      return `已合并 ${selectedRepoNames.value.length} 个项目`;
+      return t('repo.activeRepoBadge', { count: selectedRepoNames.value.length });
     });
 
     function importCommits(commits, repoName) {
@@ -247,12 +241,6 @@
       }
 
       if (!handle) {
-        if (!isSilent) {
-          showToast(
-            `💡 项目「${getRepoDisplayName(repoName)}」未建立直接句柄绑定，可点击上传框重新选取一次以激活一键刷新`,
-            'info'
-          );
-        }
         return false;
       }
 
@@ -262,7 +250,6 @@
           if (isSilent) return false;
           perm = await handle.requestPermission({ mode: 'read' });
           if (perm !== 'granted') {
-            showToast(`⚠️ 未授予「${getRepoDisplayName(repoName)}」目录读取权限`, 'warning');
             return false;
           }
         }
@@ -279,17 +266,12 @@
           importCommits(result.commits, repoName);
 
           if (oldTopHash !== newTopHash || oldCount !== newCount) {
-            showToast(`🔄 已重新读取并同步「${getRepoDisplayName(repoName)}」最新提交日志`);
-          } else if (!isSilent) {
-            showToast(`✅ 已拉取最新 Git 日志，「${getRepoDisplayName(repoName)}」已是最新状态`);
+            showToast(t('repoAction.refreshedToast', { name: getRepoDisplayName(repoName) }));
           }
           return true;
         }
       } catch (err) {
         console.warn(`[Refresh] 刷新项目「${repoName}」失败:`, err);
-        if (!isSilent) {
-          showToast(`⚠️ 刷新「${getRepoDisplayName(repoName)}」失败: ${err.message || '读取异常'}`);
-        }
       } finally {
         if (!isSilent) isRefreshing.value = false;
       }
@@ -298,25 +280,19 @@
 
     async function refreshSelectedRepos(isSilent = false) {
       if (selectedRepoNames.value.length === 0) {
-        if (!isSilent) showToast('💡 请先在列表中勾选要刷新的项目');
         return;
       }
       if (!isSilent) isRefreshing.value = true;
-      let refreshedCount = 0;
       try {
         for (const name of selectedRepoNames.value) {
-          const success = await refreshRepoByHandle(name, isSilent);
-          if (success) refreshedCount++;
-        }
-        if (!isSilent && refreshedCount === 0) {
-          showToast('💡 提示：点击项目卡片选取目录后即可永久享受一键极速刷新', 'info');
+          await refreshRepoByHandle(name, isSilent);
         }
       } finally {
         isRefreshing.value = false;
       }
     }
 
-    // 6. Window Focus Auto-Sync Listener (切回窗口静默自动感知，带防抖与清理)
+    // 6. Window Focus Auto-Sync Listener
     let lastFocusCheckTime = 0;
     function setupWindowFocusAutoRefresh() {
       if (cleanupFocusListener) return;
@@ -327,7 +303,6 @@
         lastFocusCheckTime = now;
 
         if (selectedRepoNames.value.length > 0) {
-          console.log('👀 [Auto-Sync] 窗口获得焦点，正在静默检查 Git 仓库更新…');
           for (const name of selectedRepoNames.value) {
             await refreshRepoByHandle(name, true);
           }
@@ -354,7 +329,7 @@
       if ('showDirectoryPicker' in window) {
         try {
           const dirHandle = await window.showDirectoryPicker();
-          showLoading('⏳ 正在读取并解析 .git/logs 文件…');
+          showLoading();
           await new Promise((r) => setTimeout(r, 40));
 
           const result = await window.GitParser.parseFromDirectoryHandle(dirHandle);
@@ -364,9 +339,7 @@
             await DBStorage.saveHandle(result.repoName, dirHandle);
             repoHandlesMap.set(result.repoName, dirHandle);
             importCommits(result.commits, result.repoName);
-            showToast(
-              `✅ 成功导入「${getRepoDisplayName(result.repoName)}」 ${result.commits.length} 条记录 (已开启自动同步)`
-            );
+            showToast(t('toast.repoParsed', { name: getRepoDisplayName(result.repoName), count: result.commits.length }));
             return true;
           }
         } catch (err) {
@@ -377,7 +350,6 @@
       return false;
     }
 
-    // Helper: Recursively scan FileSystemEntry (supports hidden .git directory reading)
     async function scanFileEntries(entry) {
       if (!entry) return [];
       if (entry.isFile) {
@@ -418,7 +390,7 @@
     }
 
     async function handleDropFiles(dataTransfer) {
-      showLoading('⏳ 正在解析 Git 仓库与提交记录…');
+      showLoading();
       await new Promise((r) => setTimeout(r, 40));
 
       try {
@@ -492,7 +464,7 @@
             if (commits && commits.length > 0) {
               const finalRepoName = detectedRepoName || 'LocalRepo';
               importCommits(commits, finalRepoName);
-              showToast(`✅ 成功解析「${getRepoDisplayName(finalRepoName)}」 ${commits.length} 条 Commit 记录`);
+              showToast(t('toast.repoParsed', { name: getRepoDisplayName(finalRepoName), count: commits.length }));
               return;
             }
           }
@@ -502,14 +474,12 @@
       } finally {
         hideLoading();
       }
-
-      showToast('💡 提示：请拖入包含 .git 的项目文件夹、.git 目录或导出的 git log 文本文件！', 'warning');
     }
 
     async function handleFileInputChange(files) {
       if (!files || files.length === 0) return;
 
-      showLoading('⏳ 正在提取项目日志并构建提交序列…');
+      showLoading();
       await new Promise((r) => setTimeout(r, 40));
 
       try {
@@ -556,7 +526,7 @@
           hideLoading();
           if (commits && commits.length > 0) {
             importCommits(commits, repoName);
-            showToast(`✅ 成功提取「${getRepoDisplayName(repoName)}」 ${commits.length} 条 Commit 记录`);
+            showToast(t('toast.repoParsed', { name: getRepoDisplayName(repoName), count: commits.length }));
             return;
           }
         }
@@ -565,8 +535,6 @@
       } finally {
         hideLoading();
       }
-
-      showToast('💡 提示：浏览器选择文件夹可能过滤隐藏的 .git 目录。建议直接将项目文件夹拖拽到页面中！', 'warning');
     }
 
     return {

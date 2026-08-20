@@ -2,19 +2,30 @@
  * Main Application Entry Point
  * Vue 3 Root App mounting, Global Component Registration & Composition API integration
  * Fully equipped with Apple-Grade Animation Engine, Debounced Render & Event Lifecycle Cleanup
+ * Full i18n support with Chinese, English, Japanese, and Korean
  */
 
 (function (window) {
-  const { createApp, ref, onMounted, onUnmounted, watch, nextTick } = window.Vue;
+  const { createApp, ref, computed, onMounted, onUnmounted, watch, nextTick } = window.Vue;
 
   const App = {
     setup() {
+      // 0. i18n Engine
+      const i18n = window.useI18n ? window.useI18n() : {
+        locale: ref('zh-CN'),
+        supportedLocales: [],
+        currentLocaleInfo: ref({ code: 'zh-CN', label: '简体中文', icon: '🇨🇳' }),
+        setLocale: () => {},
+        t: (k) => k
+      };
+      const { t, locale, supportedLocales, currentLocaleInfo, setLocale } = i18n;
+
       // 1. Loading State
       const isLoading = ref(false);
-      const loadingMessage = ref('正在解析 Git 提交记录…');
+      const loadingMessage = ref(t('report.generatingLoading'));
 
-      function showLoading(msg = '正在解析 Git 提交记录…') {
-        loadingMessage.value = msg;
+      function showLoading(msg) {
+        loadingMessage.value = msg || t('report.generatingLoading');
         isLoading.value = true;
       }
 
@@ -67,20 +78,20 @@
         motion
       });
 
-      // Item count options label mapping
-      const itemCountOptions = [
-        { value: '2-3', label: '2 ~ 3 条 (默认精炼)' },
-        { value: '3-5', label: '3 ~ 5 条 (标准适中)' },
-        { value: '5-8', label: '5 ~ 8 条 (详细完整)' },
-        { value: 'auto', label: '自动自适应 (根据提交量)' }
-      ];
+      // Item count options dynamic i18n mapping
+      const itemCountOptions = computed(() => [
+        { value: '2-3', label: t('itemCountOptions.2-3') },
+        { value: '3-5', label: t('itemCountOptions.3-5') },
+        { value: '5-8', label: t('itemCountOptions.5-8') },
+        { value: 'auto', label: t('itemCountOptions.auto') }
+      ]);
 
       // Provider options label mapping
       const providerOptions = [
-        { value: 'deepseek', label: 'DeepSeek (推荐)' },
+        { value: 'deepseek', label: 'DeepSeek' },
         { value: 'openai', label: 'OpenAI (GPT-4o/3.5)' },
-        { value: 'ollama', label: 'Ollama (本地大模型)' },
-        { value: 'custom', label: '自定义 API' }
+        { value: 'ollama', label: 'Ollama (Local LLM)' },
+        { value: 'custom', label: 'Custom API' }
       ];
 
       // Drag & Drop event bindings
@@ -164,22 +175,24 @@
         }
       );
 
-      // Icons update watcher (batching)
-      watch(
-        [
-          () => theme.themeMode.value,
-          () => repos.recentRepos.value.length,
-          () => repos.selectedRepoNames.value,
-          () => commits.filteredCommits.value.length,
-          () => commits.isDetailModalOpen.value,
-          () => settings.isSettingsModalOpen.value,
-          () => settings.settingsTab.value
-        ],
-        () => {
-          refreshIcons();
-        },
-        { flush: 'post' }
-      );
+      // Language Switcher Modal State
+      const isLanguageModalOpen = ref(false);
+
+      function openLanguageModal(e) {
+        if (e) e.stopPropagation();
+        isLanguageModalOpen.value = true;
+      }
+
+      function closeLanguageModal() {
+        isLanguageModalOpen.value = false;
+      }
+
+      function onSelectLanguage(code) {
+        setLocale(code);
+        const targetLocale = supportedLocales.find(l => l.code === code);
+        const langName = targetLocale ? targetLocale.label : code;
+        toast.showToast(t('toast.languageSwitched', { lang: langName }));
+      }
 
       // Theme Customizer Popover state
       const isThemePopoverOpen = ref(false);
@@ -197,10 +210,30 @@
         theme.setThemeMode(mode);
       }
 
+      // Icons update watcher (batching)
+      watch(
+        [
+          () => theme.themeMode.value,
+          () => locale.value,
+          () => repos.recentRepos.value.length,
+          () => repos.selectedRepoNames.value,
+          () => commits.filteredCommits.value.length,
+          () => commits.isDetailModalOpen.value,
+          () => settings.isSettingsModalOpen.value,
+          () => settings.settingsTab.value,
+          () => isLanguageModalOpen.value
+        ],
+        () => {
+          refreshIcons();
+        },
+        { flush: 'post' }
+      );
+
       // Global Event Listeners with Safe Lifecycle Cleanup & Power-User Shortcuts
       function onKeyDown(e) {
         // 1. Esc to close modals and popovers
         if (e.key === 'Escape') {
+          if (isLanguageModalOpen.value) closeLanguageModal();
           if (isThemePopoverOpen.value) closeThemePopover();
           if (commits.isDetailModalOpen.value) commits.closeCommitDetail();
           if (settings.isSettingsModalOpen.value) settings.closeSettingsModal();
@@ -214,7 +247,7 @@
           if (!report.isTyping.value && commits.filteredCommits.value.length > 0) {
             report.generateReport();
           } else if (commits.filteredCommits.value.length === 0) {
-            toast.showToast('暂无提交记录可生成', 'warning');
+            toast.showToast(t('report.noCommitsWarn'), 'warning');
           }
           return;
         }
@@ -251,7 +284,7 @@
           if (parsed && parsed.length > 0) {
             e.preventDefault();
             repos.importCommits(parsed, 'PastedGitLog');
-            toast.showToast(`📋 已通过剪贴板成功快速导入 ${parsed.length} 条提交记录！`);
+            toast.showToast(t('toast.clipboardImportSuccess', { count: parsed.length }));
           }
         }
       }
@@ -280,7 +313,7 @@
         // 4. AI config check toast
         const savedAi = window.AIService ? window.AIService.getConfig() : null;
         if (savedAi && savedAi.apiKey) {
-          toast.showToast('⚙️ 已检测到本地 AI 配置');
+          toast.showToast(t('toast.aiConfigDetected'));
         }
 
         // 5. Register Global Event Listeners
@@ -298,6 +331,17 @@
       });
 
       return {
+        // i18n
+        t,
+        locale,
+        supportedLocales,
+        currentLocaleInfo,
+        setLocale,
+        isLanguageModalOpen,
+        openLanguageModal,
+        closeLanguageModal,
+        onSelectLanguage,
+
         // Loading
         isLoading,
         loadingMessage,
@@ -339,7 +383,6 @@
         getRepoDisplayName: repos.getRepoDisplayName,
         promptEditAlias: repos.promptEditAlias,
         removeRepo: repos.removeRepo,
-        clearAllRepos: repos.clearAllRepos,
         activeRepoMenu: repos.activeRepoMenu,
         toggleRepoMenu: repos.toggleRepoMenu,
         closeRepoMenu: repos.closeRepoMenu,
@@ -424,6 +467,7 @@
   if (window.ToastContainer) app.component('ToastContainer', window.ToastContainer);
   if (window.StudioModal) app.component('StudioModal', window.StudioModal);
   if (window.LoadingOverlay) app.component('LoadingOverlay', window.LoadingOverlay);
+  if (window.LanguageModal) app.component('LanguageModal', window.LanguageModal);
 
   app.mount('#app');
 })(window);
